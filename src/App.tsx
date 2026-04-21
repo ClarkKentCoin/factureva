@@ -14,7 +14,9 @@ import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import Onboarding from "./pages/onboarding/Onboarding";
 import Dashboard from "./pages/app/Dashboard";
-import { InvoicesPage, SettingsPage } from "./pages/app/Placeholders";
+import { SettingsPage } from "./pages/app/Placeholders";
+import InvoicesPage from "./pages/app/Invoices";
+import InvoiceEditorPage from "./pages/app/InvoiceEditor";
 import CompanyPage from "./pages/app/Company";
 import ClientsPage from "./pages/app/Clients";
 import ItemsPage from "./pages/app/Items";
@@ -49,6 +51,8 @@ const App = () => (
               element={<RequireTenant><AppShell><Dashboard /></AppShell></RequireTenant>}
             />
             <Route path="/app/invoices" element={<RequireTenant><AppShell><InvoicesPage /></AppShell></RequireTenant>} />
+            <Route path="/app/invoices/new" element={<RequireTenant><AppShell><InvoiceEditorPage /></AppShell></RequireTenant>} />
+            <Route path="/app/invoices/:id" element={<RequireTenant><AppShell><InvoiceEditorPage /></AppShell></RequireTenant>} />
             <Route path="/app/clients" element={<RequireTenant><AppShell><ClientsPage /></AppShell></RequireTenant>} />
             <Route path="/app/items" element={<RequireTenant><AppShell><ItemsPage /></AppShell></RequireTenant>} />
             <Route path="/app/activities" element={<RequireTenant><AppShell><ActivitiesPage /></AppShell></RequireTenant>} />
