@@ -640,6 +640,17 @@ export default function InvoiceEditorPage() {
           setLastSentTo(to);
         }}
       />
+
+      {invoice.id && currentTenantId && (
+        <RecordPaymentDialog
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          invoiceId={invoice.id}
+          tenantId={currentTenantId}
+          defaultAmount={due}
+          onRecorded={refreshPayments}
+        />
+      )}
     </PageBody>
   );
 }
