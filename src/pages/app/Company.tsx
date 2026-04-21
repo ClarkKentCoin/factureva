@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Upload, Trash2 } from "lucide-react";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 import {
   EMPTY_FORM, type CompanyFormValues, type CompanyRow,
   deriveRequirements, loadPrimaryCompany, rowToForm, savePrimaryCompany, validate,
