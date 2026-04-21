@@ -154,6 +154,29 @@ export default function InvoiceEditorPage() {
 
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
   const readonly = status !== "draft";
+  const visibleStatus = computeVisibleStatus(status, invoice.due_date, paidAmount, totals.total_ttc);
+  const due = balanceDue(totals.total_ttc, paidAmount);
+  const canRecordPayment = (status === "issued" || status === "paid") && !!invoice.id;
+
+  const refreshPayments = async () => {
+    if (!invoice.id) return;
+    try {
+      const [pays, { data: inv }] = await Promise.all([
+        listPayments(invoice.id),
+        supabase.from("invoices").select("paid_amount, status").eq("id", invoice.id).maybeSingle(),
+      ]);
+      setPayments(pays);
+      if (inv) {
+        setPaidAmount(Number((inv as { paid_amount?: number }).paid_amount ?? 0));
+        setStatus((inv as { status: InvoiceStatus }).status);
+      }
+    } catch { /* noop */ }
+  };
+
+  const onDeletePayment = async (pid: string) => {
+    try { await deletePayment(pid); toast.success(t("invoices.payments.toasts.deleted")); refreshPayments(); }
+    catch { toast.error(t("common.saveError")); }
+  };
 
   const previewCompany: PreviewCompany | null = readonly ? snapshotSeller : (company ? {
     logo_url: company.logo_url,
