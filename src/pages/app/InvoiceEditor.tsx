@@ -115,6 +115,8 @@ export default function InvoiceEditorPage() {
             quantity: Number(l.quantity), unit: l.unit,
             unit_price: Number(l.unit_price), vat_rate: Number(l.vat_rate),
           })) : [newEmptyLine(0)]);
+          setLastSentAt((inv as { last_sent_at?: string | null }).last_sent_at ?? null);
+          setLastSentTo((inv as { last_sent_to?: string | null }).last_sent_to ?? null);
           // For issued/cancelled: prefer the frozen snapshot
           if (inv.status !== "draft") {
             setSnapshotSeller((inv.seller_snapshot ?? null) as PreviewCompany | null);
