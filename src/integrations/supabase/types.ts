@@ -637,6 +637,7 @@ export type Database = {
           operation_type: string | null
           paid_amount: number
           seller_snapshot: Json
+          source_devis_id: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht: number
           tenant_id: string
@@ -667,6 +668,7 @@ export type Database = {
           operation_type?: string | null
           paid_amount?: number
           seller_snapshot?: Json
+          source_devis_id?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht?: number
           tenant_id: string
@@ -697,6 +699,7 @@ export type Database = {
           operation_type?: string | null
           paid_amount?: number
           seller_snapshot?: Json
+          source_devis_id?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht?: number
           tenant_id?: string
@@ -718,6 +721,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_source_devis_id_fkey"
+            columns: ["source_devis_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
           {
@@ -1218,8 +1228,17 @@ export type Database = {
         | "franchise_base_tva"
         | "other"
       interface_language: "fr" | "en" | "ru"
-      invoice_document_type: "invoice"
-      invoice_status: "draft" | "issued" | "paid" | "overdue" | "cancelled"
+      invoice_document_type: "invoice" | "devis"
+      invoice_status:
+        | "draft"
+        | "issued"
+        | "paid"
+        | "overdue"
+        | "cancelled"
+        | "sent"
+        | "accepted"
+        | "rejected"
+        | "expired"
       item_type: "service" | "good" | "mixed"
       legal_entity_type: "individual" | "company"
       nature_of_activity: "commerciale" | "artisanale" | "liberale" | "agricole"
@@ -1403,8 +1422,18 @@ export const Constants = {
         "other",
       ],
       interface_language: ["fr", "en", "ru"],
-      invoice_document_type: ["invoice"],
-      invoice_status: ["draft", "issued", "paid", "overdue", "cancelled"],
+      invoice_document_type: ["invoice", "devis"],
+      invoice_status: [
+        "draft",
+        "issued",
+        "paid",
+        "overdue",
+        "cancelled",
+        "sent",
+        "accepted",
+        "rejected",
+        "expired",
+      ],
       item_type: ["service", "good", "mixed"],
       legal_entity_type: ["individual", "company"],
       nature_of_activity: ["commerciale", "artisanale", "liberale", "agricole"],
