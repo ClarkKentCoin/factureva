@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -18,34 +18,45 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-
-const CATEGORIES = [
-  "web_design", "web_development", "consulting", "digital_services",
-  "goods_sales", "ecommerce", "physical_production", "mixed", "other",
-] as const;
-type Category = (typeof CATEGORIES)[number];
+import {
+  NATURES_OF_ACTIVITY, NAF_SECTIONS, NAF_DIVISIONS_BY_SECTION,
+  getSectionLabel, getDivisionLabel, type NatureOfActivity,
+} from "@/lib/naf";
 
 type Activity = {
   id: string;
   tenant_id: string;
   name: string;
-  category: Category;
-  code: string | null;
+  nature_of_activity: NatureOfActivity;
+  naf_section_code: string;
+  naf_section_label: string;
+  naf_division_code: string | null;
+  naf_division_label: string | null;
   description: string | null;
   is_active: boolean;
   created_at: string;
 };
 
+const NONE = "__none__";
+
 const schema = z.object({
   name: z.string().trim().min(1).max(120),
-  category: z.enum(CATEGORIES),
-  code: z.string().trim().max(60).optional().or(z.literal("")),
+  nature_of_activity: z.enum(NATURES_OF_ACTIVITY),
+  naf_section_code: z.string().min(1).max(2),
+  naf_division_code: z.string().max(2).optional().or(z.literal("")),
   description: z.string().trim().max(1000).optional().or(z.literal("")),
   is_active: z.boolean(),
 });
 type FormData = z.infer<typeof schema>;
 
-const emptyForm: FormData = { name: "", category: "other", code: "", description: "", is_active: true };
+const emptyForm: FormData = {
+  name: "",
+  nature_of_activity: "commerciale",
+  naf_section_code: "S",
+  naf_division_code: "",
+  description: "",
+  is_active: true,
+};
 
 export default function ActivitiesPage() {
   const { t } = useTranslation();
@@ -66,7 +77,7 @@ export default function ActivitiesPage() {
       .eq("tenant_id", currentTenantId)
       .order("created_at", { ascending: false });
     if (error) toast.error(t("common.loadError"));
-    else setRows((data ?? []) as Activity[]);
+    else setRows((data ?? []) as unknown as Activity[]);
     setLoading(false);
   };
 
@@ -76,29 +87,47 @@ export default function ActivitiesPage() {
   const openEdit = (a: Activity) => {
     setEditing(a);
     setForm({
-      name: a.name, category: a.category,
-      code: a.code ?? "", description: a.description ?? "",
+      name: a.name,
+      nature_of_activity: a.nature_of_activity,
+      naf_section_code: a.naf_section_code,
+      naf_division_code: a.naf_division_code ?? "",
+      description: a.description ?? "",
       is_active: a.is_active,
     });
     setOpen(true);
   };
+
+  const divisionsForSection = useMemo(
+    () => NAF_DIVISIONS_BY_SECTION[form.naf_section_code] ?? [],
+    [form.naf_section_code],
+  );
 
   const submit = async () => {
     if (!currentTenantId) return;
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(t("company.toasts.invalid")); return; }
     setSaving(true);
+    const sectionLabel = getSectionLabel(parsed.data.naf_section_code);
+    const divisionCode = parsed.data.naf_division_code || null;
+    const divisionLabel = divisionCode
+      ? getDivisionLabel(parsed.data.naf_section_code, divisionCode) || null
+      : null;
+
     const payload = {
       tenant_id: currentTenantId,
       name: parsed.data.name,
-      category: parsed.data.category,
-      code: parsed.data.code || null,
+      nature_of_activity: parsed.data.nature_of_activity,
+      naf_section_code: parsed.data.naf_section_code,
+      naf_section_label: sectionLabel,
+      naf_division_code: divisionCode,
+      naf_division_label: divisionLabel,
       description: parsed.data.description || null,
       is_active: parsed.data.is_active,
     };
+    // Cast to any: the generated types file hasn't picked up the new columns yet.
     const res = editing
-      ? await supabase.from("activities").update(payload).eq("id", editing.id)
-      : await supabase.from("activities").insert(payload);
+      ? await supabase.from("activities").update(payload as any).eq("id", editing.id)
+      : await supabase.from("activities").insert(payload as any);
     setSaving(false);
     if (res.error) { toast.error(t("common.saveError")); return; }
     toast.success(t("common.saved"));
@@ -142,13 +171,22 @@ export default function ActivitiesPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="font-medium truncate">{a.name}</div>
-                  <Badge variant="secondary">{t(`activities.category.${a.category}`)}</Badge>
+                  <Badge variant="secondary">
+                    {t(`activities.nature.${a.nature_of_activity}`)}
+                  </Badge>
+                  <Badge variant="outline">
+                    NAF {a.naf_section_code}
+                    {a.naf_division_code ? `.${a.naf_division_code}` : ""}
+                  </Badge>
                   {!a.is_active && <Badge variant="outline">{t("common.inactive")}</Badge>}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5 truncate">
+                  {a.naf_section_label}
+                  {a.naf_division_label ? ` · ${a.naf_division_label}` : ""}
                 </div>
                 {a.description && (
                   <div className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{a.description}</div>
                 )}
-                {a.code && <div className="text-xs text-muted-foreground mt-0.5">{a.code}</div>}
               </div>
               <div className="flex gap-2 shrink-0">
                 <Button size="sm" variant="ghost" onClick={() => openEdit(a)} className="gap-1">
@@ -166,30 +204,80 @@ export default function ActivitiesPage() {
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? t("activities.edit") : t("activities.new")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label>{t("activities.fields.name")}</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder={t("activities.fields.namePlaceholder")}
+              />
             </div>
+
             <div>
-              <Label>{t("activities.fields.category")}</Label>
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as Category })}>
+              <Label>{t("activities.fields.nature")}</Label>
+              <Select
+                value={form.nature_of_activity}
+                onValueChange={(v) => setForm({ ...form, nature_of_activity: v as NatureOfActivity })}
+              >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>{t(`activities.category.${c}`)}</SelectItem>
+                  {NATURES_OF_ACTIVITY.map((n) => (
+                    <SelectItem key={n} value={n}>
+                      {t(`activities.nature.${n}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t(`activities.natureHelp.${form.nature_of_activity}`)}
+              </p>
+            </div>
+
+            <div>
+              <Label>{t("activities.fields.naf_section")}</Label>
+              <Select
+                value={form.naf_section_code}
+                onValueChange={(v) => setForm({ ...form, naf_section_code: v, naf_division_code: "" })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {NAF_SECTIONS.map((s) => (
+                    <SelectItem key={s.code} value={s.code}>
+                      {s.code} — {s.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>{t("activities.fields.code")}</Label>
-              <Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
-            </div>
+
+            {divisionsForSection.length > 0 && (
+              <div>
+                <Label>
+                  {t("activities.fields.naf_division")}{" "}
+                  <span className="text-xs text-muted-foreground">({t("common.optional")})</span>
+                </Label>
+                <Select
+                  value={form.naf_division_code || NONE}
+                  onValueChange={(v) => setForm({ ...form, naf_division_code: v === NONE ? "" : v })}
+                >
+                  <SelectTrigger><SelectValue placeholder={t("activities.fields.naf_division_placeholder")} /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value={NONE}>{t("common.none")}</SelectItem>
+                    {divisionsForSection.map((d) => (
+                      <SelectItem key={d.code} value={d.code}>
+                        {d.code} — {d.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div>
               <Label>{t("activities.fields.description")}</Label>
               <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
