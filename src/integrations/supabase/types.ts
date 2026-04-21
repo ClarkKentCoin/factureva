@@ -102,6 +102,74 @@ export type Database = {
           },
         ]
       }
+      clients: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          client_type: Database["public"]["Enums"]["client_type"]
+          country_code: Database["public"]["Enums"]["country_code"]
+          created_at: string
+          display_name: string
+          email: string | null
+          id: string
+          is_active: boolean
+          legal_name: string | null
+          notes: string | null
+          phone: string | null
+          postal_code: string | null
+          tenant_id: string
+          updated_at: string
+          vat_number: string | null
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          client_type?: Database["public"]["Enums"]["client_type"]
+          country_code?: Database["public"]["Enums"]["country_code"]
+          created_at?: string
+          display_name: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name?: string | null
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          tenant_id: string
+          updated_at?: string
+          vat_number?: string | null
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          client_type?: Database["public"]["Enums"]["client_type"]
+          country_code?: Database["public"]["Enums"]["country_code"]
+          created_at?: string
+          display_name?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name?: string | null
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          tenant_id?: string
+          updated_at?: string
+          vat_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address_line1: string | null
@@ -750,6 +818,7 @@ export type Database = {
         | "other"
       app_role: "super_admin"
       audit_actor_type: "user" | "super_admin" | "system"
+      client_type: "company" | "individual"
       country_code: "FR"
       document_language: "fr" | "en" | "ru"
       fr_legal_form:
@@ -921,6 +990,7 @@ export const Constants = {
       ],
       app_role: ["super_admin"],
       audit_actor_type: ["user", "super_admin", "system"],
+      client_type: ["company", "individual"],
       country_code: ["FR"],
       document_language: ["fr", "en", "ru"],
       fr_legal_form: [
