@@ -92,6 +92,8 @@ export async function saveDraft(
     address_line1: company.address_line1, address_line2: company.address_line2,
     postal_code: company.postal_code, city: company.city,
     email: company.email, phone: company.phone,
+    logo_url: company.logo_url,
+    payment_defaults: company.payment_defaults,
   } : {};
 
   let clientSnapshot: Record<string, unknown> = {};
