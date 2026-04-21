@@ -35,7 +35,7 @@ export async function listPayments(invoiceId: string): Promise<PaymentRow[]> {
     .eq("invoice_id", invoiceId)
     .order("payment_date", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as PaymentRow[];
+  return ((data ?? []) as unknown) as PaymentRow[];
 }
 
 export async function recordPayment(
@@ -57,7 +57,7 @@ export async function recordPayment(
     })
     .select("*").single();
   if (error) throw error;
-  return data as PaymentRow;
+  return (data as unknown) as PaymentRow;
 }
 
 export async function deletePayment(paymentId: string): Promise<void> {
