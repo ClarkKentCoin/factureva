@@ -90,7 +90,6 @@ const resources = {
         archived: "Archivé.",
         restored: "Restauré.",
         optional: "optionnel",
-        none: "Aucun",
       },
       activities: {
         title: "Activités",
@@ -320,7 +319,7 @@ const resources = {
         confirmDelete: "Confirm deletion?",
         saved: "Saved.", saveError: "Save failed.", loadError: "Load failed.",
         deleted: "Deleted.", archived: "Archived.", restored: "Restored.",
-        optional: "optional", none: "None",
+        optional: "optional",
       },
       activities: {
         title: "Activities",
@@ -519,7 +518,7 @@ const resources = {
         confirmDelete: "Подтвердить удаление?",
         saved: "Сохранено.", saveError: "Ошибка сохранения.", loadError: "Ошибка загрузки.",
         deleted: "Удалено.", archived: "В архиве.", restored: "Восстановлено.",
-        optional: "необязательно", none: "Нет",
+        optional: "необязательно",
       },
       activities: {
         title: "Виды деятельности",
