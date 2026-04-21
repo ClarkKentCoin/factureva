@@ -30,37 +30,15 @@ export default function Onboarding() {
 
   const createWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
-    const { data: tenant, error } = await supabase
-      .from("tenants")
-      .insert({
-        name: workspaceName,
-        created_by: user.id,
-        default_country: "FR",
-        default_document_language: "fr",
-      })
-      .select()
-      .single();
-
-    if (error || !tenant) { setLoading(false); return toast.error(error?.message ?? "Erreur"); }
-
-    const { error: memErr } = await supabase
-      .from("tenant_members")
-      .insert({ tenant_id: tenant.id, user_id: user.id, role: "owner" });
-
-    // Subscribe tenant to free plan by default
-    const { data: freePlan } = await supabase
-      .from("plans").select("id").eq("code", "free").single();
-    if (freePlan) {
-      await supabase.from("tenant_subscriptions").insert({
-        tenant_id: tenant.id, plan_id: freePlan.id, status: "active",
-      });
-    }
-
+    const { data: tenantId, error } = await supabase.rpc("create_initial_tenant", {
+      _name: workspaceName,
+    });
     setLoading(false);
-    if (memErr) return toast.error(memErr.message);
+    if (error || !tenantId) return toast.error(error?.message ?? "Erreur");
 
-    setCurrentTenantId(tenant.id);
+    setCurrentTenantId(tenantId as string);
     await refresh();
     setStep(2);
   };
