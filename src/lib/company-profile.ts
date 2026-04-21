@@ -179,7 +179,7 @@ export async function savePrimaryCompany(
   if (existingId) {
     const { data, error } = await supabase
       .from("companies")
-      .update(payload)
+      .update(payload as any)
       .eq("id", existingId)
       .select("*")
       .single();
@@ -188,7 +188,7 @@ export async function savePrimaryCompany(
   }
   const { data, error } = await supabase
     .from("companies")
-    .insert(payload)
+    .insert(payload as any)
     .select("*")
     .single();
   if (error) throw error;
