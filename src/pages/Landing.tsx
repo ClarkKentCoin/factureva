@@ -36,7 +36,7 @@ export default function Landing() {
           {t("app.tagline")}
         </h1>
         <p className="mt-6 text-muted-foreground max-w-xl text-lg">
-          Factures, devis, clients, paiements. Conçu pour la France — pensé pour l'international.
+          {t("landing.heroSubtitle")}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Button asChild size="lg"><Link to="/auth/sign-up">{t("auth.createAccount")}</Link></Button>

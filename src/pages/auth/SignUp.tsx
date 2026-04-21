@@ -28,7 +28,7 @@ export default function SignUp() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Compte créé");
+    toast.success(t("auth.accountCreated"));
     nav("/onboarding");
   };
 

@@ -45,8 +45,8 @@ export default function Dashboard() {
       </div>
 
       <EmptyState
-        title="Démarrez votre activité"
-        description="Configurez votre entreprise et créez votre première facture."
+        title={t("dashboard.getStartedTitle")}
+        description={t("dashboard.getStartedDescription")}
         action={<Button asChild><Link to="/app/company">{t("dashboard.completeProfile")}</Link></Button>}
       />
     </PageBody>

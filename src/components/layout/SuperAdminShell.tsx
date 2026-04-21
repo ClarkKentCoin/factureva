@@ -13,10 +13,10 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   const items = [
-    { to: "/superadmin", label: "Overview", icon: Gauge, end: true },
-    { to: "/superadmin/tenants", label: "Tenants", icon: Building2 },
-    { to: "/superadmin/plans", label: "Plans & features", icon: ScrollText },
-    { to: "/superadmin/audit", label: "Audit logs", icon: FileSearch },
+    { to: "/superadmin", label: t("superadmin.nav.overview"), icon: Gauge, end: true },
+    { to: "/superadmin/tenants", label: t("superadmin.nav.tenants"), icon: Building2 },
+    { to: "/superadmin/plans", label: t("superadmin.nav.plans"), icon: ScrollText },
+    { to: "/superadmin/audit", label: t("superadmin.nav.audit"), icon: FileSearch },
   ];
 
   const Sidebar = (
@@ -25,8 +25,8 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
         <Link to="/superadmin" className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5" />
           <div>
-            <div className="font-serif text-xl leading-none">Superadmin</div>
-            <div className="text-[11px] opacity-70 mt-1">Platform console</div>
+            <div className="font-serif text-xl leading-none">{t("nav.superadmin")}</div>
+            <div className="text-[11px] opacity-70 mt-1">{t("superadmin.console")}</div>
           </div>
         </Link>
       </div>
@@ -50,7 +50,7 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
           to="/app"
           className="mt-3 block px-3 py-2 rounded-md text-xs text-primary-foreground/60 hover:bg-primary-foreground/10"
         >
-          ← Back to tenant app
+          {t("superadmin.backToApp")}
         </NavLink>
       </nav>
       <div className="px-3 py-3 border-t border-primary-foreground/10 space-y-1">
@@ -79,7 +79,7 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
           <button onClick={() => setOpen(true)} className="p-2 -ml-2 rounded-md hover:bg-muted" aria-label="menu">
             <Menu className="h-5 w-5" />
           </button>
-          <div className="font-serif text-xl">Superadmin</div>
+          <div className="font-serif text-xl">{t("nav.superadmin")}</div>
           <div className="w-9" />
         </header>
         <main className="flex-1 min-w-0">{children}</main>
