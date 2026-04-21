@@ -16,36 +16,51 @@ export type Database = {
     Tables: {
       activities: {
         Row: {
-          category: Database["public"]["Enums"]["activity_category"]
+          category: Database["public"]["Enums"]["activity_category"] | null
           code: string | null
           created_at: string
           description: string | null
           id: string
           is_active: boolean
           meta: Json
+          naf_division_code: string | null
+          naf_division_label: string | null
+          naf_section_code: string
+          naf_section_label: string
           name: string
+          nature_of_activity: Database["public"]["Enums"]["nature_of_activity"]
           tenant_id: string
         }
         Insert: {
-          category?: Database["public"]["Enums"]["activity_category"]
+          category?: Database["public"]["Enums"]["activity_category"] | null
           code?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
           meta?: Json
+          naf_division_code?: string | null
+          naf_division_label?: string | null
+          naf_section_code: string
+          naf_section_label: string
           name: string
+          nature_of_activity: Database["public"]["Enums"]["nature_of_activity"]
           tenant_id: string
         }
         Update: {
-          category?: Database["public"]["Enums"]["activity_category"]
+          category?: Database["public"]["Enums"]["activity_category"] | null
           code?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
           meta?: Json
+          naf_division_code?: string | null
+          naf_division_label?: string | null
+          naf_section_code?: string
+          naf_section_label?: string
           name?: string
+          nature_of_activity?: Database["public"]["Enums"]["nature_of_activity"]
           tenant_id?: string
         }
         Relationships: [
@@ -844,6 +859,7 @@ export type Database = {
       interface_language: "fr" | "en" | "ru"
       item_type: "service" | "good" | "mixed"
       legal_entity_type: "individual" | "company"
+      nature_of_activity: "commerciale" | "artisanale" | "liberale" | "agricole"
       tenant_role: "owner" | "admin" | "member" | "viewer"
       vat_regime:
         | "franchise_base"
@@ -1018,6 +1034,7 @@ export const Constants = {
       interface_language: ["fr", "en", "ru"],
       item_type: ["service", "good", "mixed"],
       legal_entity_type: ["individual", "company"],
+      nature_of_activity: ["commerciale", "artisanale", "liberale", "agricole"],
       tenant_role: ["owner", "admin", "member", "viewer"],
       vat_regime: [
         "franchise_base",
