@@ -109,9 +109,7 @@ export default function Onboarding() {
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">{t("onboarding.step3")}</p>
           <div className="surface p-4 text-sm text-muted-foreground">
-            {t("common.comingSoon")} — le formulaire complet de profil entreprise (forme juridique,
-            SIREN/SIRET, régime TVA, mentions légales) est prêt côté données et sera connecté à
-            l'étape suivante.
+            {t("common.comingSoon")} — {t("onboarding.companyProfileNote")}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => nav("/app")}>

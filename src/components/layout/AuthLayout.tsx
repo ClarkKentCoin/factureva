@@ -1,18 +1,20 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function AuthLayout({ title, subtitle, children, footer }: {
   title: string; subtitle?: string; children: ReactNode; footer?: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
       <div className="hidden lg:flex flex-col justify-between p-10 bg-primary text-primary-foreground">
         <Link to="/" className="font-serif text-2xl">Facturly</Link>
         <div>
           <p className="font-serif text-3xl leading-snug max-w-md">
-            « Une facturation française rigoureuse, pour des entrepreneurs sereins. »
+            {t("auth.sideQuote")}
           </p>
-          <p className="mt-4 text-sm opacity-70">Multi-tenant · Conforme · Mobile-first</p>
+          <p className="mt-4 text-sm opacity-70">{t("auth.sideTags")}</p>
         </div>
         <div className="text-xs opacity-60">© Facturly</div>
       </div>
