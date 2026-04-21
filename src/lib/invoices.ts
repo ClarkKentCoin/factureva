@@ -1,7 +1,10 @@
 /**
- * Invoices data layer — tenant-scoped.
- * Single source of truth for invoice + lines persistence so UI components
+ * Documents data layer (invoices + devis) — tenant-scoped.
+ * Single source of truth for document + lines persistence so UI components
  * never duplicate save/numbering logic.
+ *
+ * Both invoice and devis share the `invoices` table; the `document_type`
+ * column ("invoice" | "devis") routes labels, numbering prefix and lifecycle.
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -11,6 +14,7 @@ import { loadPrimaryCompany } from "@/lib/company-profile";
 export type InvoiceRow = Database["public"]["Tables"]["invoices"]["Row"];
 export type InvoiceLineRow = Database["public"]["Tables"]["invoice_lines"]["Row"];
 export type InvoiceStatus = Database["public"]["Enums"]["invoice_status"];
+export type DocumentType = Database["public"]["Enums"]["invoice_document_type"];
 
 export type EditorLine = {
   id?: string;
@@ -54,6 +58,18 @@ export async function listInvoices(tenantId: string) {
     .from("invoices")
     .select("*, client:clients(display_name)")
     .eq("tenant_id", tenantId)
+    .eq("document_type", "invoice")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function listDevis(tenantId: string) {
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("*, client:clients(display_name)")
+    .eq("tenant_id", tenantId)
+    .eq("document_type", "devis")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data ?? [];
@@ -76,11 +92,17 @@ function totalsFromLines(lines: EditorLine[]) {
   return computeInvoiceTotals(inputs);
 }
 
+/**
+ * Save a draft document (invoice or devis). Default document type is "invoice"
+ * for backward compatibility with existing call sites.
+ */
 export async function saveDraft(
   tenantId: string,
   userId: string | null,
   inv: EditorInvoice,
   lines: EditorLine[],
+  documentType: DocumentType = "invoice",
+  extra?: { source_devis_id?: string | null },
 ): Promise<string> {
   const totals = totalsFromLines(lines);
   const company = await loadPrimaryCompany(tenantId);
@@ -108,11 +130,11 @@ export async function saveDraft(
     };
   }
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     tenant_id: tenantId,
     company_id: company?.id ?? null,
     client_id: inv.client_id,
-    document_type: "invoice" as const,
+    document_type: documentType,
     issue_date: inv.issue_date,
     due_date: inv.due_date,
     currency_code: inv.currency_code || "EUR",
@@ -126,15 +148,18 @@ export async function saveDraft(
     legal_requirements_snapshot: (company?.legal_requirements ?? {}) as any,
     updated_by: userId,
   };
+  if (extra && "source_devis_id" in extra) {
+    payload.source_devis_id = extra.source_devis_id ?? null;
+  }
 
   let invoiceId = inv.id;
   if (invoiceId) {
-    const { error } = await supabase.from("invoices").update(payload).eq("id", invoiceId);
+    const { error } = await supabase.from("invoices").update(payload as any).eq("id", invoiceId);
     if (error) throw error;
   } else {
     const { data, error } = await supabase
       .from("invoices")
-      .insert({ ...payload, status: "draft", created_by: userId })
+      .insert({ ...payload, status: "draft", created_by: userId } as any)
       .select("id").single();
     if (error) throw error;
     invoiceId = data.id;
@@ -170,7 +195,7 @@ export async function saveDraft(
   return invoiceId!;
 }
 
-/** Issue a draft invoice: claim a number, set status, freeze issue_date. */
+/** Issue a draft invoice: claim a number, set status=issued, freeze issue_date. */
 export async function issueInvoice(tenantId: string, invoiceId: string): Promise<string> {
   const today = new Date();
   const yyyy = today.getFullYear();
@@ -193,6 +218,39 @@ export async function issueInvoice(tenantId: string, invoiceId: string): Promise
     .eq("id", invoiceId);
   if (error) throw error;
   return number;
+}
+
+/** Issue a draft devis: claim a DEV number, set status=sent, freeze issue_date. */
+export async function issueDevis(tenantId: string, devisId: string): Promise<string> {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const iso = today.toISOString().slice(0, 10);
+
+  const { data: numData, error: numErr } = await supabase.rpc("claim_invoice_number", {
+    _tenant_id: tenantId, _document_type: "devis", _year: yyyy,
+  });
+  if (numErr) throw numErr;
+  const number = numData as unknown as string;
+
+  const { error } = await supabase
+    .from("invoices")
+    .update({
+      status: "sent" as InvoiceStatus,
+      invoice_number: number,
+      issue_date: iso,
+      issued_at: new Date().toISOString(),
+    } as any)
+    .eq("id", devisId);
+  if (error) throw error;
+  return number;
+}
+
+/** Set a devis to a lifecycle status (accepted/rejected/expired/cancelled). */
+export async function setDevisStatus(devisId: string, status: InvoiceStatus): Promise<void> {
+  const patch: Record<string, unknown> = { status };
+  if (status === "cancelled") patch.cancelled_at = new Date().toISOString();
+  const { error } = await supabase.from("invoices").update(patch as any).eq("id", devisId);
+  if (error) throw error;
 }
 
 export async function cancelInvoice(invoiceId: string) {
@@ -220,5 +278,37 @@ export async function duplicateInvoice(tenantId: string, userId: string | null, 
     quantity: Number(l.quantity), unit: l.unit,
     unit_price: Number(l.unit_price), vat_rate: Number(l.vat_rate),
   }));
-  return saveDraft(tenantId, userId, editorInv, editorLines);
+  return saveDraft(tenantId, userId, editorInv, editorLines, invoice.document_type);
+}
+
+/**
+ * Convert a devis (any state) into a NEW invoice draft.
+ * The original devis is preserved; the new invoice carries `source_devis_id`.
+ * Returns the new invoice id.
+ */
+export async function convertDevisToInvoice(
+  tenantId: string,
+  userId: string | null,
+  devisId: string,
+): Promise<string> {
+  const { invoice, lines } = await loadInvoiceWithLines(devisId);
+  if (invoice.document_type !== "devis") throw new Error("not_a_devis");
+  const today = new Date();
+  const due = new Date(today); due.setDate(due.getDate() + 30);
+  const editorInv: EditorInvoice = {
+    client_id: invoice.client_id,
+    issue_date: today.toISOString().slice(0, 10),
+    due_date: due.toISOString().slice(0, 10),
+    currency_code: invoice.currency_code,
+    document_language: invoice.document_language,
+    notes: invoice.notes,
+  };
+  const editorLines: EditorLine[] = lines.map((l, i) => ({
+    sort_order: i,
+    item_id: l.item_id, activity_id: l.activity_id, item_type: l.item_type,
+    label: l.label, description: l.description,
+    quantity: Number(l.quantity), unit: l.unit,
+    unit_price: Number(l.unit_price), vat_rate: Number(l.vat_rate),
+  }));
+  return saveDraft(tenantId, userId, editorInv, editorLines, "invoice", { source_devis_id: devisId });
 }

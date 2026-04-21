@@ -10,6 +10,7 @@ const resources = {
       nav: {
         dashboard: "Tableau de bord",
         invoices: "Factures",
+        devis: "Devis",
         clients: "Clients",
         company: "Entreprise",
         items: "Catalogue",
@@ -439,7 +440,7 @@ const resources = {
     translation: {
       app: { name: "Facturly", tagline: "French invoicing, simple and structured." },
       nav: {
-        dashboard: "Dashboard", invoices: "Invoices", clients: "Clients",
+        dashboard: "Dashboard", invoices: "Invoices", devis: "Quotes", clients: "Clients",
         company: "Company", items: "Catalog", activities: "Activities",
         settings: "Settings", signOut: "Sign out", superadmin: "Superadmin",
       },
@@ -785,7 +786,7 @@ const resources = {
     translation: {
       app: { name: "Facturly", tagline: "Французский биллинг — просто и структурно." },
       nav: {
-        dashboard: "Дашборд", invoices: "Счета", clients: "Клиенты",
+        dashboard: "Дашборд", invoices: "Счета", devis: "Сметы", clients: "Клиенты",
         company: "Компания", items: "Каталог", activities: "Виды деятельности",
         settings: "Настройки", signOut: "Выйти", superadmin: "Суперадмин",
       },

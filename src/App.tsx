@@ -17,6 +17,8 @@ import Dashboard from "./pages/app/Dashboard";
 import { SettingsPage } from "./pages/app/Placeholders";
 import InvoicesPage from "./pages/app/Invoices";
 import InvoiceEditorPage from "./pages/app/InvoiceEditor";
+import DevisPage from "./pages/app/Devis";
+import DevisEditorPage from "./pages/app/DevisEditor";
 import CompanyPage from "./pages/app/Company";
 import ClientsPage from "./pages/app/Clients";
 import ItemsPage from "./pages/app/Items";
@@ -53,6 +55,9 @@ const App = () => (
             <Route path="/app/invoices" element={<RequireTenant><AppShell><InvoicesPage /></AppShell></RequireTenant>} />
             <Route path="/app/invoices/new" element={<RequireTenant><AppShell><InvoiceEditorPage /></AppShell></RequireTenant>} />
             <Route path="/app/invoices/:id" element={<RequireTenant><AppShell><InvoiceEditorPage /></AppShell></RequireTenant>} />
+            <Route path="/app/devis" element={<RequireTenant><AppShell><DevisPage /></AppShell></RequireTenant>} />
+            <Route path="/app/devis/new" element={<RequireTenant><AppShell><DevisEditorPage /></AppShell></RequireTenant>} />
+            <Route path="/app/devis/:id" element={<RequireTenant><AppShell><DevisEditorPage /></AppShell></RequireTenant>} />
             <Route path="/app/clients" element={<RequireTenant><AppShell><ClientsPage /></AppShell></RequireTenant>} />
             <Route path="/app/items" element={<RequireTenant><AppShell><ItemsPage /></AppShell></RequireTenant>} />
             <Route path="/app/activities" element={<RequireTenant><AppShell><ActivitiesPage /></AppShell></RequireTenant>} />

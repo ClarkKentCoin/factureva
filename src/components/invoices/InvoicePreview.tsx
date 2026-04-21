@@ -1,8 +1,8 @@
 /**
  * InvoicePreview — V1 structured document preview.
- * Renders a clean, printable invoice document from structured data.
- * NOT a freeform editor; templates can later swap the layout, but the
- * data shape (company, client, lines, totals, legal mentions) stays stable.
+ * Renders a clean, printable document from structured data.
+ * Supports both invoice ("facture") and devis (quote) via the `kind` prop:
+ * only the document title and date label change — the rest is shared.
  */
 import { useTranslation } from "react-i18next";
 import { computeInvoiceTotals, formatMoney } from "@/lib/invoice-totals";
@@ -43,10 +43,12 @@ type Props = {
   company: PreviewCompany | null;
   client: PreviewClient | null;
   legalMentions?: { key: string; reason: string }[];
+  /** "invoice" (default) or "devis" — controls title + status namespace + date label. */
+  kind?: "invoice" | "devis";
 };
 
 export default function InvoicePreview({
-  invoice, lines, number, status, company, client, legalMentions = [],
+  invoice, lines, number, status, company, client, legalMentions = [], kind = "invoice",
 }: Props) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
@@ -55,6 +57,7 @@ export default function InvoicePreview({
   );
   const fmt = (n: number) => formatMoney(n, invoice.currency_code, locale);
   const fmtDate = (s?: string | null) => (s ? new Date(s).toLocaleDateString(locale) : "—");
+  const isDevis = kind === "devis";
 
   const companyLines = [
     company?.legal_name && company?.legal_name !== company?.company_name ? company.legal_name : null,
@@ -73,6 +76,16 @@ export default function InvoicePreview({
     client?.email,
     client?.vat_number ? `${t("invoices.preview.vatNumberShort")} ${client.vat_number}` : null,
   ].filter(Boolean) as string[];
+
+  const documentTitle = isDevis
+    ? t("devis.preview.documentTitle")
+    : t("invoices.preview.documentTitle");
+  const dueLabel = isDevis
+    ? t("devis.preview.validUntil")
+    : t("invoices.preview.dueDate");
+  const statusLabel = isDevis
+    ? t(`devis.status.${status}`, { defaultValue: status })
+    : t(`invoices.status.${status}`, { defaultValue: status });
 
   return (
     <div className="bg-card text-card-foreground border border-border rounded-md shadow-sm">
@@ -102,7 +115,7 @@ export default function InvoicePreview({
             </div>
           </div>
           <div className="text-right shrink-0">
-            <div className="font-serif text-2xl tracking-tight">{t("invoices.preview.documentTitle")}</div>
+            <div className="font-serif text-2xl tracking-tight">{documentTitle}</div>
             <div className="mt-1 font-mono text-sm">{number ?? t("invoices.draftLabel")}</div>
             <div className="mt-3 text-xs text-muted-foreground space-y-0.5">
               <div>
@@ -110,10 +123,10 @@ export default function InvoicePreview({
                 <span className="text-foreground">{fmtDate(invoice.issue_date)}</span>
               </div>
               <div>
-                <span className="uppercase tracking-wide">{t("invoices.preview.dueDate")}</span>{" "}
+                <span className="uppercase tracking-wide">{dueLabel}</span>{" "}
                 <span className="text-foreground">{fmtDate(invoice.due_date)}</span>
               </div>
-              <div className="uppercase tracking-wide">{t(`invoices.status.${status}`)}</div>
+              <div className="uppercase tracking-wide">{statusLabel}</div>
             </div>
           </div>
         </header>
@@ -202,8 +215,8 @@ export default function InvoicePreview({
           </section>
         )}
 
-        {/* Payment */}
-        {(company?.payment_defaults?.iban || company?.payment_defaults?.payment_instructions) && (
+        {/* Payment (invoices only — not relevant for quotes) */}
+        {!isDevis && (company?.payment_defaults?.iban || company?.payment_defaults?.payment_instructions) && (
           <section className="pt-4 border-t border-border mt-4">
             <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
               {t("invoices.preview.paymentTitle")}
@@ -214,6 +227,15 @@ export default function InvoicePreview({
               {company.payment_defaults?.payment_instructions && (
                 <div className="whitespace-pre-line text-muted-foreground">{company.payment_defaults.payment_instructions}</div>
               )}
+            </div>
+          </section>
+        )}
+
+        {/* Devis-specific footer */}
+        {isDevis && (
+          <section className="pt-4 border-t border-border mt-4">
+            <div className="text-[11px] text-muted-foreground italic">
+              {t("devis.preview.acceptanceNote")}
             </div>
           </section>
         )}
