@@ -214,6 +214,15 @@ const resources = {
           documentsDesc: "Langue par défaut et délais de paiement.",
           payment: "Coordonnées de paiement",
           paymentDesc: "Affichées sur vos factures pour faciliter le règlement.",
+          logo: "Logo de l'entreprise",
+          logoDesc: "Affiché en haut de vos factures et documents.",
+        },
+        logo: {
+          empty: "Aucun logo",
+          upload: "Téléverser un logo",
+          replace: "Remplacer le logo",
+          remove: "Supprimer",
+          hint: "PNG, JPG, SVG ou WEBP — 2 Mo max.",
         },
         fields: {
           company_name: "Nom commercial",
