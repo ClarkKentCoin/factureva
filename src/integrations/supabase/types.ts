@@ -376,6 +376,69 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_email_logs: {
+        Row: {
+          body: string | null
+          cc: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          invoice_id: string
+          provider: string | null
+          provider_message_id: string | null
+          recipient: string
+          sent_by: string | null
+          status: string
+          subject: string
+          tenant_id: string
+        }
+        Insert: {
+          body?: string | null
+          cc?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          invoice_id: string
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient: string
+          sent_by?: string | null
+          status?: string
+          subject: string
+          tenant_id: string
+        }
+        Update: {
+          body?: string | null
+          cc?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          invoice_id?: string
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient?: string
+          sent_by?: string | null
+          status?: string
+          subject?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_email_logs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_email_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_lines: {
         Row: {
           activity_id: string | null
@@ -516,6 +579,8 @@ export type Database = {
           invoice_number: string | null
           issue_date: string | null
           issued_at: string | null
+          last_sent_at: string | null
+          last_sent_to: string | null
           legal_requirements_snapshot: Json
           notes: string | null
           operation_type: string | null
@@ -543,6 +608,8 @@ export type Database = {
           invoice_number?: string | null
           issue_date?: string | null
           issued_at?: string | null
+          last_sent_at?: string | null
+          last_sent_to?: string | null
           legal_requirements_snapshot?: Json
           notes?: string | null
           operation_type?: string | null
@@ -570,6 +637,8 @@ export type Database = {
           invoice_number?: string | null
           issue_date?: string | null
           issued_at?: string | null
+          last_sent_at?: string | null
+          last_sent_to?: string | null
           legal_requirements_snapshot?: Json
           notes?: string | null
           operation_type?: string | null

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy, Download, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
@@ -22,6 +22,8 @@ import {
 import { computeInvoiceTotals, formatMoney } from "@/lib/invoice-totals";
 import { loadPrimaryCompany, type CompanyRow } from "@/lib/company-profile";
 import InvoicePreview, { type PreviewClient, type PreviewCompany } from "@/components/invoices/InvoicePreview";
+import SendInvoiceEmailDialog from "@/components/invoices/SendInvoiceEmailDialog";
+import { renderInvoicePdf, downloadBlob } from "@/lib/invoice-pdf";
 
 type ClientLite = { id: string; display_name: string };
 type ItemLite = {
@@ -67,6 +69,12 @@ export default function InvoiceEditorPage() {
   const [snapshotSeller, setSnapshotSeller] = useState<PreviewCompany | null>(null);
   const [snapshotClient, setSnapshotClient] = useState<PreviewClient | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [lastSentAt, setLastSentAt] = useState<string | null>(null);
+  const [lastSentTo, setLastSentTo] = useState<string | null>(null);
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const offscreenRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!currentTenantId) return;
@@ -107,6 +115,8 @@ export default function InvoiceEditorPage() {
             quantity: Number(l.quantity), unit: l.unit,
             unit_price: Number(l.unit_price), vat_rate: Number(l.vat_rate),
           })) : [newEmptyLine(0)]);
+          setLastSentAt((inv as { last_sent_at?: string | null }).last_sent_at ?? null);
+          setLastSentTo((inv as { last_sent_to?: string | null }).last_sent_to ?? null);
           // For issued/cancelled: prefer the frozen snapshot
           if (inv.status !== "draft") {
             setSnapshotSeller((inv.seller_snapshot ?? null) as PreviewCompany | null);
@@ -219,6 +229,37 @@ export default function InvoiceEditorPage() {
     } catch { toast.error(t("common.saveError")); }
   };
 
+  const pdfFilename = () => {
+    const base = number ?? `draft-${invoice.id ?? "new"}`;
+    return `${base}.pdf`.replace(/[^a-zA-Z0-9._-]/g, "_");
+  };
+
+  // Off-screen render keeps the PDF capture independent of the on-screen layout.
+  const renderForCapture = async () => {
+    const node = offscreenRef.current ?? previewRef.current;
+    if (!node) throw new Error("preview_not_ready");
+    return renderInvoicePdf(node, pdfFilename());
+  };
+
+  const onDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const { blob, filename } = await renderForCapture();
+      downloadBlob(blob, filename);
+      toast.success(t("invoices.pdf.toasts.downloaded"));
+    } catch { toast.error(t("invoices.pdf.errors.generateFailed")); }
+    finally { setDownloading(false); }
+  };
+
+  const emailDefaults = useMemo(() => {
+    const recipient = (readonly ? snapshotClient?.email : clientFull?.email) ?? "";
+    const sellerName = previewCompany?.company_name ?? "";
+    const docNum = number ?? t("invoices.draftLabel");
+    const subject = t("invoices.email.defaults.subject", { number: docNum, company: sellerName });
+    const body = t("invoices.email.defaults.body", { number: docNum, company: sellerName });
+    return { recipient: recipient || "", subject, body };
+  }, [readonly, snapshotClient, clientFull, previewCompany, number, t]);
+
   if (loading) return <PageBody><div className="surface p-6 text-sm text-muted-foreground">{t("common.loading")}</div></PageBody>;
 
   const previewNode = (
@@ -273,6 +314,16 @@ export default function InvoiceEditorPage() {
                 </Button>
               </>
             )}
+            {!isNew && (
+              <Button variant="outline" onClick={onDownloadPdf} disabled={downloading} className="gap-1">
+                <Download className="h-4 w-4" />{t("invoices.actions.downloadPdf")}
+              </Button>
+            )}
+            {readonly && invoice.id && (
+              <Button variant="outline" onClick={() => setEmailOpen(true)} className="gap-1">
+                <Mail className="h-4 w-4" />{t("invoices.actions.sendEmail")}
+              </Button>
+            )}
             {readonly && (
               <Button variant="outline" onClick={onDuplicate} className="gap-1">
                 <Copy className="h-4 w-4" />{t("invoices.duplicate")}
@@ -286,6 +337,18 @@ export default function InvoiceEditorPage() {
         <div className="surface p-3 mb-4 text-xs text-muted-foreground flex items-start gap-2">
           <Pencil className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>{t("invoices.issuedHint")}</span>
+        </div>
+      )}
+
+      {lastSentAt && (
+        <div className="surface p-3 mb-4 text-xs text-muted-foreground flex items-center gap-2">
+          <Mail className="h-3.5 w-3.5 shrink-0" />
+          <span>
+            {t("invoices.email.lastSent", {
+              to: lastSentTo ?? "—",
+              when: new Date(lastSentAt).toLocaleString(locale),
+            })}
+          </span>
         </div>
       )}
 
@@ -463,10 +526,38 @@ export default function InvoiceEditorPage() {
             <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
               {t("invoices.preview.title")}
             </div>
-            {previewNode}
+            <div ref={previewRef}>{previewNode}</div>
           </div>
         </aside>
       </div>
+
+      {/* Off-screen preview at fixed A4-friendly width for clean PDF capture.
+          Always rendered with the same data so PDF == on-screen preview. */}
+      <div
+        aria-hidden
+        style={{
+          position: "fixed", left: "-10000px", top: 0,
+          width: "794px", // ≈ A4 width @ 96dpi
+          background: "#ffffff",
+        }}
+      >
+        <div ref={offscreenRef}>{previewNode}</div>
+      </div>
+
+      <SendInvoiceEmailDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        invoiceId={invoice.id ?? null}
+        defaults={emailDefaults}
+        generatePdf={async () => {
+          const { base64, filename } = await renderForCapture();
+          return { base64, filename };
+        }}
+        onSent={(to) => {
+          setLastSentAt(new Date().toISOString());
+          setLastSentTo(to);
+        }}
+      />
     </PageBody>
   );
 }
