@@ -19,13 +19,8 @@ const variantFor = (s: InvoiceStatus): "secondary" | "default" | "outline" | "de
   : s === "overdue" ? "destructive"
   : "default";
 
-const openLabelKey: Record<InvoiceStatus, string> = {
-  draft: "invoices.openDraft",
-  issued: "invoices.openIssued",
-  paid: "invoices.openIssued",
-  overdue: "invoices.openIssued",
-  cancelled: "invoices.openIssued",
-};
+const openLabel = (s: InvoiceStatus): string =>
+  s === "draft" ? "invoices.openDraft" : "invoices.openIssued";
 
 export default function InvoicesPage() {
   const { t, i18n } = useTranslation();
@@ -121,7 +116,7 @@ export default function InvoicesPage() {
                     )}
                   </div>
                   <Button asChild size="sm" variant="outline">
-                    <Link to={`/app/invoices/${r.id}`}>{t(openLabelKey[r.status as InvoiceStatus])}</Link>
+                    <Link to={`/app/invoices/${r.id}`}>{t(openLabel(r.status as InvoiceStatus))}</Link>
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => onDuplicate(r.id)} className="gap-1">
                     <Copy className="h-4 w-4" />{t("invoices.duplicate")}
