@@ -15,8 +15,9 @@ import SignUp from "./pages/auth/SignUp";
 import Onboarding from "./pages/onboarding/Onboarding";
 import Dashboard from "./pages/app/Dashboard";
 import {
-  InvoicesPage, ClientsPage, ItemsPage, ActivitiesPage, CompanyPage, SettingsPage,
+  InvoicesPage, ClientsPage, ItemsPage, ActivitiesPage, SettingsPage,
 } from "./pages/app/Placeholders";
+import CompanyPage from "./pages/app/Company";
 import SuperAdminOverview from "./pages/superadmin/Overview";
 import SuperAdminTenants from "./pages/superadmin/Tenants";
 import SuperAdminPlans from "./pages/superadmin/Plans";

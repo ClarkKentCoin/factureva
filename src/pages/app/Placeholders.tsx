@@ -17,5 +17,4 @@ export const InvoicesPage = makePlaceholder("nav.invoices", "placeholders.invoic
 export const ClientsPage = makePlaceholder("nav.clients", "placeholders.clients");
 export const ItemsPage = makePlaceholder("nav.items", "placeholders.items");
 export const ActivitiesPage = makePlaceholder("nav.activities", "placeholders.activities");
-export const CompanyPage = makePlaceholder("nav.company", "placeholders.company");
 export const SettingsPage = makePlaceholder("nav.settings", "placeholders.settings");
