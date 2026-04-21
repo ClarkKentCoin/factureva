@@ -69,6 +69,12 @@ export default function InvoiceEditorPage() {
   const [snapshotSeller, setSnapshotSeller] = useState<PreviewCompany | null>(null);
   const [snapshotClient, setSnapshotClient] = useState<PreviewClient | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [lastSentAt, setLastSentAt] = useState<string | null>(null);
+  const [lastSentTo, setLastSentTo] = useState<string | null>(null);
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const offscreenRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!currentTenantId) return;
