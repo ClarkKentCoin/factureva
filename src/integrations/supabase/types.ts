@@ -134,6 +134,7 @@ export type Database = {
           updated_at: string
           vat_number: string | null
           vat_regime: Database["public"]["Enums"]["vat_regime"]
+          website: string | null
         }
         Insert: {
           address_line1?: string | null
@@ -166,6 +167,7 @@ export type Database = {
           updated_at?: string
           vat_number?: string | null
           vat_regime?: Database["public"]["Enums"]["vat_regime"]
+          website?: string | null
         }
         Update: {
           address_line1?: string | null
@@ -198,6 +200,7 @@ export type Database = {
           updated_at?: string
           vat_number?: string | null
           vat_regime?: Database["public"]["Enums"]["vat_regime"]
+          website?: string | null
         }
         Relationships: [
           {

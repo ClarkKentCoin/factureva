@@ -1,14 +1,26 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { PageBody, PageHeader, StatCard, EmptyState } from "@/components/layout/PageScaffold";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
-import { FileText, UserPlus, Building2 } from "lucide-react";
+import { FileText, UserPlus, Building2, CheckCircle2 } from "lucide-react";
+import { loadPrimaryCompany } from "@/lib/company-profile";
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const { memberships, currentTenantId } = useAuth();
   const current = memberships.find((m) => m.tenant_id === currentTenantId);
+  const [hasCompany, setHasCompany] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!currentTenantId) return;
+    let alive = true;
+    loadPrimaryCompany(currentTenantId)
+      .then((row) => alive && setHasCompany(!!row))
+      .catch(() => alive && setHasCompany(false));
+    return () => { alive = false; };
+  }, [currentTenantId]);
 
   return (
     <PageBody>
@@ -38,17 +50,22 @@ export default function Dashboard() {
               <Link to="/app/clients"><UserPlus className="h-4 w-4" />{t("dashboard.newClient")}</Link>
             </Button>
             <Button asChild variant="outline" className="w-full justify-start gap-2">
-              <Link to="/app/company"><Building2 className="h-4 w-4" />{t("dashboard.completeProfile")}</Link>
+              <Link to="/app/company">
+                {hasCompany ? <CheckCircle2 className="h-4 w-4" /> : <Building2 className="h-4 w-4" />}
+                {t("dashboard.completeProfile")}
+              </Link>
             </Button>
           </div>
         </div>
       </div>
 
-      <EmptyState
-        title={t("dashboard.getStartedTitle")}
-        description={t("dashboard.getStartedDescription")}
-        action={<Button asChild><Link to="/app/company">{t("dashboard.completeProfile")}</Link></Button>}
-      />
+      {hasCompany === false && (
+        <EmptyState
+          title={t("dashboard.getStartedTitle")}
+          description={t("dashboard.getStartedDescription")}
+          action={<Button asChild><Link to="/app/company">{t("dashboard.completeProfile")}</Link></Button>}
+        />
+      )}
     </PageBody>
   );
 }
