@@ -211,6 +211,7 @@ export type Database = {
           phone: string | null
           postal_code: string | null
           regulated_activity_flags: Json
+          signature_url: string | null
           siren: string | null
           siret: string | null
           tenant_id: string
@@ -244,6 +245,7 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           regulated_activity_flags?: Json
+          signature_url?: string | null
           siren?: string | null
           siret?: string | null
           tenant_id: string
@@ -277,6 +279,7 @@ export type Database = {
           phone?: string | null
           postal_code?: string | null
           regulated_activity_flags?: Json
+          signature_url?: string | null
           siren?: string | null
           siret?: string | null
           tenant_id?: string
@@ -618,6 +621,7 @@ export type Database = {
         Row: {
           cancelled_at: string | null
           client_id: string | null
+          client_signature_url: string | null
           client_snapshot: Json
           company_id: string | null
           created_at: string
@@ -649,6 +653,7 @@ export type Database = {
         Insert: {
           cancelled_at?: string | null
           client_id?: string | null
+          client_signature_url?: string | null
           client_snapshot?: Json
           company_id?: string | null
           created_at?: string
@@ -680,6 +685,7 @@ export type Database = {
         Update: {
           cancelled_at?: string | null
           client_id?: string | null
+          client_signature_url?: string | null
           client_snapshot?: Json
           company_id?: string | null
           created_at?: string
