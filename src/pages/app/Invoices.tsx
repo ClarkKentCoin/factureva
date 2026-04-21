@@ -94,6 +94,9 @@ export default function InvoicesPage() {
                 <div className="text-sm text-muted-foreground mt-0.5 truncate">
                   {r.client?.display_name ?? t("invoices.noClient")}
                   {r.issue_date && <> · {new Date(r.issue_date).toLocaleDateString(locale)}</>}
+                  {r.last_sent_at && (
+                    <> · <span className="text-foreground/70">{t("invoices.email.sentBadge")}</span></>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap">
