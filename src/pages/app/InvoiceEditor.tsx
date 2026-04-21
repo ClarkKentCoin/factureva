@@ -75,6 +75,9 @@ export default function InvoiceEditorPage() {
   const [downloading, setDownloading] = useState(false);
   const [lastSentAt, setLastSentAt] = useState<string | null>(null);
   const [lastSentTo, setLastSentTo] = useState<string | null>(null);
+  const [paidAmount, setPaidAmount] = useState(0);
+  const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const offscreenRef = useRef<HTMLDivElement | null>(null);
 
