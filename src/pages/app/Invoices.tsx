@@ -96,14 +96,17 @@ export default function InvoicesPage() {
                   {r.issue_date && <> · {new Date(r.issue_date).toLocaleDateString(locale)}</>}
                 </div>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap">
                 <div className="font-mono text-sm">
                   {formatMoney(Number(r.total_ttc), r.currency_code, locale)}
                 </div>
+                <Button asChild size="sm" variant="outline">
+                  <Link to={`/app/invoices/${r.id}`}>{t(openLabelKey[r.status as InvoiceStatus])}</Link>
+                </Button>
                 <Button size="sm" variant="ghost" onClick={() => onDuplicate(r.id)} className="gap-1">
                   <Copy className="h-4 w-4" />{t("invoices.duplicate")}
                 </Button>
-                {r.status !== "cancelled" && (
+                {r.status !== "cancelled" && r.status === "draft" && (
                   <Button size="sm" variant="ghost" onClick={() => onCancel(r.id)} className="gap-1">
                     <Ban className="h-4 w-4" />{t("invoices.cancel")}
                   </Button>
