@@ -431,6 +431,8 @@ const resources = {
             saveFailed: "Échec de l'enregistrement du paiement.",
           },
         },
+      },
+      notFound: { message: "Oups ! Page introuvable", back: "Retour à l'accueil" },
     },
   },
   en: {
