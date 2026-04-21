@@ -526,10 +526,38 @@ export default function InvoiceEditorPage() {
             <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
               {t("invoices.preview.title")}
             </div>
-            {previewNode}
+            <div ref={previewRef}>{previewNode}</div>
           </div>
         </aside>
       </div>
+
+      {/* Off-screen preview at fixed A4-friendly width for clean PDF capture.
+          Always rendered with the same data so PDF == on-screen preview. */}
+      <div
+        aria-hidden
+        style={{
+          position: "fixed", left: "-10000px", top: 0,
+          width: "794px", // ≈ A4 width @ 96dpi
+          background: "#ffffff",
+        }}
+      >
+        <div ref={offscreenRef}>{previewNode}</div>
+      </div>
+
+      <SendInvoiceEmailDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        invoiceId={invoice.id ?? null}
+        defaults={emailDefaults}
+        generatePdf={async () => {
+          const { base64, filename } = await renderForCapture();
+          return { base64, filename };
+        }}
+        onSent={(to) => {
+          setLastSentAt(new Date().toISOString());
+          setLastSentTo(to);
+        }}
+      />
     </PageBody>
   );
 }
