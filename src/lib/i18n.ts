@@ -357,6 +357,7 @@ const resources = {
           saveDraft: "Enregistrer le brouillon",
           issue: "Émettre la facture",
           addLine: "Ajouter une ligne",
+          preview: "Aperçu",
         },
         toasts: {
           saved: "Brouillon enregistré.",
@@ -641,6 +642,7 @@ const resources = {
         },
         actions: {
           saveDraft: "Save draft", issue: "Issue invoice", addLine: "Add line",
+          preview: "Preview",
         },
         toasts: {
           saved: "Draft saved.",
@@ -926,6 +928,7 @@ const resources = {
         },
         actions: {
           saveDraft: "Сохранить черновик", issue: "Выпустить счёт", addLine: "Добавить строку",
+          preview: "Предпросмотр",
         },
         toasts: {
           saved: "Черновик сохранён.",
