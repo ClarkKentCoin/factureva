@@ -16,6 +16,14 @@ const statusVariant: Record<InvoiceStatus, "secondary" | "default" | "outline" |
   draft: "secondary", issued: "default", paid: "default", overdue: "destructive", cancelled: "outline",
 };
 
+const openLabelKey: Record<InvoiceStatus, string> = {
+  draft: "invoices.openDraft",
+  issued: "invoices.openIssued",
+  paid: "invoices.openIssued",
+  overdue: "invoices.openIssued",
+  cancelled: "invoices.openIssued",
+};
+
 export default function InvoicesPage() {
   const { t, i18n } = useTranslation();
   const { currentTenantId, user } = useAuth();
