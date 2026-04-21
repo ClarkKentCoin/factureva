@@ -331,8 +331,14 @@ export default function InvoiceEditorPage() {
         description={readonly ? t("invoices.readonlyDescription") : t("invoices.editorDescription")}
         actions={
           <div className="flex flex-wrap gap-2">
-            <Badge variant={status === "draft" ? "secondary" : status === "cancelled" ? "outline" : "default"}>
-              {t(`invoices.status.${status}`)}
+            <Badge variant={
+              visibleStatus === "paid" ? "default"
+              : visibleStatus === "overdue" ? "destructive"
+              : visibleStatus === "draft" ? "secondary"
+              : visibleStatus === "cancelled" ? "outline"
+              : "default"
+            }>
+              {t(`invoices.status.${visibleStatus}`)}
             </Badge>
             {!readonly && (
               <>
@@ -343,6 +349,11 @@ export default function InvoiceEditorPage() {
                   <Send className="h-4 w-4" />{t("invoices.actions.issue")}
                 </Button>
               </>
+            )}
+            {canRecordPayment && due > 0 && (
+              <Button onClick={() => setPaymentOpen(true)} className="gap-1">
+                <Wallet className="h-4 w-4" />{t("invoices.payments.actions.record")}
+              </Button>
             )}
             {!isNew && (
               <Button variant="outline" onClick={onDownloadPdf} disabled={downloading} className="gap-1">
