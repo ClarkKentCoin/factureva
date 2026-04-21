@@ -229,6 +229,37 @@ export default function InvoiceEditorPage() {
     } catch { toast.error(t("common.saveError")); }
   };
 
+  const pdfFilename = () => {
+    const base = number ?? `draft-${invoice.id ?? "new"}`;
+    return `${base}.pdf`.replace(/[^a-zA-Z0-9._-]/g, "_");
+  };
+
+  // Off-screen render keeps the PDF capture independent of the on-screen layout.
+  const renderForCapture = async () => {
+    const node = offscreenRef.current ?? previewRef.current;
+    if (!node) throw new Error("preview_not_ready");
+    return renderInvoicePdf(node, pdfFilename());
+  };
+
+  const onDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const { blob, filename } = await renderForCapture();
+      downloadBlob(blob, filename);
+      toast.success(t("invoices.pdf.toasts.downloaded"));
+    } catch { toast.error(t("invoices.pdf.errors.generateFailed")); }
+    finally { setDownloading(false); }
+  };
+
+  const emailDefaults = useMemo(() => {
+    const recipient = (readonly ? snapshotClient?.email : clientFull?.email) ?? "";
+    const sellerName = previewCompany?.company_name ?? "";
+    const docNum = number ?? t("invoices.draftLabel");
+    const subject = t("invoices.email.defaults.subject", { number: docNum, company: sellerName });
+    const body = t("invoices.email.defaults.body", { number: docNum, company: sellerName });
+    return { recipient: recipient || "", subject, body };
+  }, [readonly, snapshotClient, clientFull, previewCompany, number, t]);
+
   if (loading) return <PageBody><div className="surface p-6 text-sm text-muted-foreground">{t("common.loading")}</div></PageBody>;
 
   const previewNode = (
