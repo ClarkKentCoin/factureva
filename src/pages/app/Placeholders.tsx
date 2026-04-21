@@ -14,7 +14,4 @@ export function makePlaceholder(titleKey: string, bodyKey: string) {
 }
 
 export const InvoicesPage = makePlaceholder("nav.invoices", "placeholders.invoices");
-export const ClientsPage = makePlaceholder("nav.clients", "placeholders.clients");
-export const ItemsPage = makePlaceholder("nav.items", "placeholders.items");
-export const ActivitiesPage = makePlaceholder("nav.activities", "placeholders.activities");
 export const SettingsPage = makePlaceholder("nav.settings", "placeholders.settings");

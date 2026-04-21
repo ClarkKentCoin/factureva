@@ -14,10 +14,11 @@ import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import Onboarding from "./pages/onboarding/Onboarding";
 import Dashboard from "./pages/app/Dashboard";
-import {
-  InvoicesPage, ClientsPage, ItemsPage, ActivitiesPage, SettingsPage,
-} from "./pages/app/Placeholders";
+import { InvoicesPage, SettingsPage } from "./pages/app/Placeholders";
 import CompanyPage from "./pages/app/Company";
+import ClientsPage from "./pages/app/Clients";
+import ItemsPage from "./pages/app/Items";
+import ActivitiesPage from "./pages/app/Activities";
 import SuperAdminOverview from "./pages/superadmin/Overview";
 import SuperAdminTenants from "./pages/superadmin/Tenants";
 import SuperAdminPlans from "./pages/superadmin/Plans";
