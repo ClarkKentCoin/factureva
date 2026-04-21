@@ -393,6 +393,47 @@ export default function InvoiceEditorPage() {
         </div>
       )}
 
+      {visibleStatus === "overdue" && (
+        <div className="surface p-3 mb-4 text-xs flex items-center gap-2 border-destructive/40 text-destructive">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          <span>{t("invoices.payments.overdueNotice")}</span>
+        </div>
+      )}
+
+      {(status === "issued" || status === "paid") && (
+        <div className="surface p-5 mb-4">
+          <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+            <h2 className="font-serif text-lg flex items-center gap-2">
+              <Wallet className="h-4 w-4" />{t("invoices.payments.sectionTitle")}
+            </h2>
+            <div className="text-sm text-muted-foreground">
+              <span className="mr-3">{t("invoices.payments.paidLabel")}: <span className="font-mono text-foreground">{formatMoney(paidAmount, invoice.currency_code, locale)}</span></span>
+              <span>{t("invoices.payments.dueLabel")}: <span className="font-mono text-foreground">{formatMoney(due, invoice.currency_code, locale)}</span></span>
+            </div>
+          </div>
+          {payments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("invoices.payments.empty")}</p>
+          ) : (
+            <ul className="divide-y divide-border text-sm">
+              {payments.map((p) => (
+                <li key={p.id} className="py-2 flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <div className="font-mono">{formatMoney(Number(p.amount), invoice.currency_code, locale)}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(p.payment_date).toLocaleDateString(locale)} · {t(`invoices.payments.method.${p.method}`)}
+                      {p.note && <> · {p.note}</>}
+                    </div>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => onDeletePayment(p.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* LEFT: structured editor (or read-only summary) */}
         <div className="space-y-4">
