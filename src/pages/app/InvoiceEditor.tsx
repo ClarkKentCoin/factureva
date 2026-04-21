@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
@@ -11,14 +11,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  loadInvoiceWithLines, saveDraft, issueInvoice, newEmptyLine,
+  loadInvoiceWithLines, saveDraft, issueInvoice, duplicateInvoice, newEmptyLine,
   type EditorInvoice, type EditorLine, type InvoiceStatus,
 } from "@/lib/invoices";
 import { computeInvoiceTotals, formatMoney } from "@/lib/invoice-totals";
+import { loadPrimaryCompany, type CompanyRow } from "@/lib/company-profile";
+import InvoicePreview, { type PreviewClient, type PreviewCompany } from "@/components/invoices/InvoicePreview";
 
 type ClientLite = { id: string; display_name: string };
 type ItemLite = {
@@ -58,6 +61,12 @@ export default function InvoiceEditorPage() {
   const [lines, setLines] = useState<EditorLine[]>([newEmptyLine(0)]);
   const [clients, setClients] = useState<ClientLite[]>([]);
   const [items, setItems] = useState<ItemLite[]>([]);
+  const [company, setCompany] = useState<CompanyRow | null>(null);
+  const [clientFull, setClientFull] = useState<PreviewClient | null>(null);
+  const [legalMentions, setLegalMentions] = useState<{ key: string; reason: string }[]>([]);
+  const [snapshotSeller, setSnapshotSeller] = useState<PreviewCompany | null>(null);
+  const [snapshotClient, setSnapshotClient] = useState<PreviewClient | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!currentTenantId) return;
@@ -65,16 +74,20 @@ export default function InvoiceEditorPage() {
     (async () => {
       setLoading(true);
       try {
-        const [clRes, itRes] = await Promise.all([
+        const [clRes, itRes, comp] = await Promise.all([
           supabase.from("clients").select("id, display_name")
             .eq("tenant_id", currentTenantId).eq("is_active", true).order("display_name"),
           supabase.from("items")
             .select("id, name, default_unit, default_unit_price, default_vat_rate, item_type, activity_id")
             .eq("tenant_id", currentTenantId).eq("is_active", true).order("name"),
+          loadPrimaryCompany(currentTenantId),
         ]);
         if (!alive) return;
         setClients((clRes.data ?? []) as ClientLite[]);
         setItems((itRes.data ?? []) as ItemLite[]);
+        setCompany(comp);
+        const lr = (comp?.legal_requirements ?? {}) as { legal_mentions?: { key: string; reason: string }[] };
+        setLegalMentions(lr.legal_mentions ?? []);
 
         if (!isNew && id) {
           const { invoice: inv, lines: ls } = await loadInvoiceWithLines(id);
@@ -94,6 +107,13 @@ export default function InvoiceEditorPage() {
             quantity: Number(l.quantity), unit: l.unit,
             unit_price: Number(l.unit_price), vat_rate: Number(l.vat_rate),
           })) : [newEmptyLine(0)]);
+          // For issued/cancelled: prefer the frozen snapshot
+          if (inv.status !== "draft") {
+            setSnapshotSeller((inv.seller_snapshot ?? null) as PreviewCompany | null);
+            setSnapshotClient((inv.client_snapshot ?? null) as PreviewClient | null);
+            const snap = (inv.legal_requirements_snapshot ?? {}) as { legal_mentions?: { key: string; reason: string }[] };
+            if (snap.legal_mentions) setLegalMentions(snap.legal_mentions);
+          }
         }
       } catch { toast.error(t("common.loadError")); }
       finally { if (alive) setLoading(false); }
@@ -101,12 +121,34 @@ export default function InvoiceEditorPage() {
     return () => { alive = false; };
   }, [currentTenantId, id, isNew, t]);
 
+  // Load full client info for preview when client changes (drafts only)
+  useEffect(() => {
+    if (status !== "draft") return;
+    if (!invoice.client_id) { setClientFull(null); return; }
+    let alive = true;
+    supabase.from("clients").select("*").eq("id", invoice.client_id).maybeSingle()
+      .then(({ data }) => { if (alive) setClientFull(data as PreviewClient | null); });
+    return () => { alive = false; };
+  }, [invoice.client_id, status]);
+
   const totals = useMemo(() => computeInvoiceTotals(
     lines.map((l) => ({ quantity: l.quantity, unit_price: l.unit_price, vat_rate: l.vat_rate }))
   ), [lines]);
 
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
   const readonly = status !== "draft";
+
+  const previewCompany: PreviewCompany | null = readonly ? snapshotSeller : (company ? {
+    logo_url: company.logo_url,
+    company_name: company.company_name,
+    legal_name: company.legal_name,
+    address_line1: company.address_line1, address_line2: company.address_line2,
+    postal_code: company.postal_code, city: company.city,
+    email: company.email, phone: company.phone,
+    siren: company.siren, siret: company.siret, vat_number: company.vat_number,
+    payment_defaults: company.payment_defaults as PreviewCompany["payment_defaults"],
+  } : null);
+  const previewClient: PreviewClient | null = readonly ? snapshotClient : clientFull;
 
   const updateLine = (idx: number, patch: Partial<EditorLine>) => {
     setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
@@ -160,26 +202,67 @@ export default function InvoiceEditorPage() {
       const newId = await saveDraft(currentTenantId, user?.id ?? null, invoice, lines);
       const num = await issueInvoice(currentTenantId, newId);
       toast.success(t("invoices.toasts.issued", { number: num }));
-      navigate(`/app/invoices/${newId}`);
+      // Stay on detail page; reload to pick up issued status + snapshots
+      navigate(`/app/invoices/${newId}`, { replace: true });
+      // Force reload of editor state
+      setTimeout(() => window.location.reload(), 50);
     } catch (e: any) { toast.error(e?.message || t("common.saveError")); }
     finally { setIssuing(false); }
   };
 
+  const onDuplicate = async () => {
+    if (!currentTenantId || !invoice.id) return;
+    try {
+      const newId = await duplicateInvoice(currentTenantId, user?.id ?? null, invoice.id);
+      toast.success(t("invoices.toasts.duplicated"));
+      navigate(`/app/invoices/${newId}`);
+    } catch { toast.error(t("common.saveError")); }
+  };
+
   if (loading) return <PageBody><div className="surface p-6 text-sm text-muted-foreground">{t("common.loading")}</div></PageBody>;
+
+  const previewNode = (
+    <InvoicePreview
+      invoice={invoice}
+      lines={lines}
+      number={number}
+      status={status}
+      company={previewCompany}
+      client={previewClient}
+      legalMentions={legalMentions}
+    />
+  );
 
   return (
     <PageBody>
-      <div className="mb-3">
+      <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
         <Button asChild variant="ghost" size="sm" className="gap-1">
           <Link to="/app/invoices"><ArrowLeft className="h-4 w-4" />{t("invoices.backToList")}</Link>
         </Button>
+        {/* Mobile preview trigger */}
+        <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1 lg:hidden">
+              <Eye className="h-4 w-4" />{t("invoices.actions.preview")}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-4">
+            <SheetHeader>
+              <SheetTitle>{t("invoices.preview.title")}</SheetTitle>
+            </SheetHeader>
+            <div className="mt-4">{previewNode}</div>
+          </SheetContent>
+        </Sheet>
       </div>
+
       <PageHeader
         title={number ?? (isNew ? t("invoices.newTitle") : t("invoices.editTitle"))}
-        description={t("invoices.editorDescription")}
+        description={readonly ? t("invoices.readonlyDescription") : t("invoices.editorDescription")}
         actions={
           <div className="flex flex-wrap gap-2">
-            <Badge variant={status === "draft" ? "secondary" : "default"}>{t(`invoices.status.${status}`)}</Badge>
+            <Badge variant={status === "draft" ? "secondary" : status === "cancelled" ? "outline" : "default"}>
+              {t(`invoices.status.${status}`)}
+            </Badge>
             {!readonly && (
               <>
                 <Button variant="outline" onClick={onSave} disabled={saving} className="gap-1">
@@ -190,71 +273,82 @@ export default function InvoiceEditorPage() {
                 </Button>
               </>
             )}
+            {readonly && (
+              <Button variant="outline" onClick={onDuplicate} className="gap-1">
+                <Copy className="h-4 w-4" />{t("invoices.duplicate")}
+              </Button>
+            )}
           </div>
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left: client + details */}
-        <div className="surface p-5 space-y-4 lg:col-span-1">
-          <h2 className="font-serif text-lg">{t("invoices.sections.client")}</h2>
-          <div>
-            <Label>{t("invoices.fields.client")}</Label>
-            <Select
-              value={invoice.client_id ?? NO_CLIENT}
-              onValueChange={(v) => setInvoice({ ...invoice, client_id: v === NO_CLIENT ? null : v })}
-              disabled={readonly}
-            >
-              <SelectTrigger><SelectValue placeholder={t("invoices.fields.clientPlaceholder")} /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NO_CLIENT}>{t("invoices.noClient")}</SelectItem>
-                {clients.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.display_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {clients.length === 0 && (
-              <p className="text-xs text-muted-foreground mt-1">
-                <Link to="/app/clients" className="underline">{t("invoices.createClientHint")}</Link>
-              </p>
-            )}
-          </div>
+      {readonly && (
+        <div className="surface p-3 mb-4 text-xs text-muted-foreground flex items-start gap-2">
+          <Pencil className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <span>{t("invoices.issuedHint")}</span>
+        </div>
+      )}
 
-          <h2 className="font-serif text-lg pt-2">{t("invoices.sections.details")}</h2>
-          <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* LEFT: structured editor (or read-only summary) */}
+        <div className="space-y-4">
+          <div className="surface p-5 space-y-4">
+            <h2 className="font-serif text-lg">{t("invoices.sections.client")}</h2>
             <div>
-              <Label>{t("invoices.fields.issueDate")}</Label>
-              <Input type="date" value={invoice.issue_date ?? ""} disabled={readonly}
-                onChange={(e) => setInvoice({ ...invoice, issue_date: e.target.value || null })} />
-            </div>
-            <div>
-              <Label>{t("invoices.fields.dueDate")}</Label>
-              <Input type="date" value={invoice.due_date ?? ""} disabled={readonly}
-                onChange={(e) => setInvoice({ ...invoice, due_date: e.target.value || null })} />
-            </div>
-            <div>
-              <Label>{t("invoices.fields.currency")}</Label>
-              <Input value={invoice.currency_code} disabled={readonly}
-                onChange={(e) => setInvoice({ ...invoice, currency_code: e.target.value.toUpperCase().slice(0, 3) })} />
-            </div>
-            <div>
-              <Label>{t("invoices.fields.docLang")}</Label>
-              <Select value={invoice.document_language}
-                onValueChange={(v) => setInvoice({ ...invoice, document_language: v as any })}
-                disabled={readonly}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Label>{t("invoices.fields.client")}</Label>
+              <Select
+                value={invoice.client_id ?? NO_CLIENT}
+                onValueChange={(v) => setInvoice({ ...invoice, client_id: v === NO_CLIENT ? null : v })}
+                disabled={readonly}
+              >
+                <SelectTrigger><SelectValue placeholder={t("invoices.fields.clientPlaceholder")} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fr">FR</SelectItem>
-                  <SelectItem value="en">EN</SelectItem>
-                  <SelectItem value="ru">RU</SelectItem>
+                  <SelectItem value={NO_CLIENT}>{t("invoices.noClient")}</SelectItem>
+                  {clients.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.display_name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {clients.length === 0 && !readonly && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  <Link to="/app/clients" className="underline">{t("invoices.createClientHint")}</Link>
+                </p>
+              )}
+            </div>
+
+            <h2 className="font-serif text-lg pt-2">{t("invoices.sections.details")}</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t("invoices.fields.issueDate")}</Label>
+                <Input type="date" value={invoice.issue_date ?? ""} disabled={readonly}
+                  onChange={(e) => setInvoice({ ...invoice, issue_date: e.target.value || null })} />
+              </div>
+              <div>
+                <Label>{t("invoices.fields.dueDate")}</Label>
+                <Input type="date" value={invoice.due_date ?? ""} disabled={readonly}
+                  onChange={(e) => setInvoice({ ...invoice, due_date: e.target.value || null })} />
+              </div>
+              <div>
+                <Label>{t("invoices.fields.currency")}</Label>
+                <Input value={invoice.currency_code} disabled={readonly}
+                  onChange={(e) => setInvoice({ ...invoice, currency_code: e.target.value.toUpperCase().slice(0, 3) })} />
+              </div>
+              <div>
+                <Label>{t("invoices.fields.docLang")}</Label>
+                <Select value={invoice.document_language}
+                  onValueChange={(v) => setInvoice({ ...invoice, document_language: v as any })}
+                  disabled={readonly}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fr">FR</SelectItem>
+                    <SelectItem value="en">EN</SelectItem>
+                    <SelectItem value="ru">RU</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right: lines + totals + notes */}
-        <div className="lg:col-span-2 space-y-4">
           <div className="surface p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-serif text-lg">{t("invoices.sections.lines")}</h2>
@@ -269,23 +363,25 @@ export default function InvoiceEditorPage() {
               {lines.map((l, idx) => (
                 <div key={idx} className="rounded-md border border-border p-3 space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                    <div className="sm:col-span-6">
-                      <Label className="text-xs">{t("invoices.line.itemPicker")}</Label>
-                      <Select
-                        value={l.item_id ?? CUSTOM_ITEM}
-                        onValueChange={(v) => pickItem(idx, v)}
-                        disabled={readonly}
-                      >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={CUSTOM_ITEM}>{t("invoices.line.customLine")}</SelectItem>
-                          {items.map((it) => (
-                            <SelectItem key={it.id} value={it.id}>{it.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="sm:col-span-6">
+                    {!readonly && (
+                      <div className="sm:col-span-6">
+                        <Label className="text-xs">{t("invoices.line.itemPicker")}</Label>
+                        <Select
+                          value={l.item_id ?? CUSTOM_ITEM}
+                          onValueChange={(v) => pickItem(idx, v)}
+                          disabled={readonly}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={CUSTOM_ITEM}>{t("invoices.line.customLine")}</SelectItem>
+                            {items.map((it) => (
+                              <SelectItem key={it.id} value={it.id}>{it.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    <div className={readonly ? "sm:col-span-12" : "sm:col-span-6"}>
                       <Label className="text-xs">{t("invoices.line.label")}</Label>
                       <Input value={l.label} disabled={readonly}
                         onChange={(e) => updateLine(idx, { label: e.target.value })} />
@@ -360,6 +456,16 @@ export default function InvoiceEditorPage() {
               onChange={(e) => setInvoice({ ...invoice, notes: e.target.value })} />
           </div>
         </div>
+
+        {/* RIGHT: live document preview (desktop only) */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-4">
+            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+              {t("invoices.preview.title")}
+            </div>
+            {previewNode}
+          </div>
+        </aside>
       </div>
     </PageBody>
   );

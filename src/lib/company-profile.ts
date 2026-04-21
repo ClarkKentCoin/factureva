@@ -27,6 +27,8 @@ export type InvoiceDefaults = {
 };
 
 export type CompanyFormValues = {
+  // branding
+  logo_url: string | null;
   // identity
   company_name: string;
   legal_name: string | null;
@@ -57,6 +59,7 @@ export type CompanyFormValues = {
 };
 
 export const EMPTY_FORM: CompanyFormValues = {
+  logo_url: null,
   company_name: "",
   legal_name: "",
   legal_entity_type: "individual",
@@ -85,6 +88,7 @@ export function rowToForm(row: CompanyRow): CompanyFormValues {
   const id = (row.invoice_defaults ?? {}) as InvoiceDefaults;
   const flags = (row.regulated_activity_flags ?? {}) as Record<string, boolean>;
   return {
+    logo_url: row.logo_url ?? null,
     company_name: row.company_name ?? "",
     legal_name: row.legal_name ?? "",
     legal_entity_type: row.legal_entity_type,
@@ -143,6 +147,7 @@ export async function savePrimaryCompany(
   const payload = {
     tenant_id: tenantId,
     is_primary: true,
+    logo_url: values.logo_url,
     company_name: values.company_name.trim(),
     legal_name: values.legal_name?.trim() || null,
     legal_entity_type: values.legal_entity_type,

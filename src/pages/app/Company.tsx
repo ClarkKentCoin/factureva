@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Upload, Trash2 } from "lucide-react";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 import {
   EMPTY_FORM, type CompanyFormValues, type CompanyRow,
   deriveRequirements, loadPrimaryCompany, rowToForm, savePrimaryCompany, validate,
@@ -67,6 +69,37 @@ export default function CompanyPage() {
   const [existing, setExisting] = useState<CompanyRow | null>(null);
   const [values, setValues] = useState<CompanyFormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const onLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !currentTenantId) return;
+    if (!/^image\/(png|jpe?g|svg\+xml|webp)$/i.test(file.type)) {
+      toast.error(t("company.toasts.logoType")); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("company.toasts.logoSize")); return;
+    }
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${currentTenantId}/logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos").upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      setValues((p) => ({ ...p, logo_url: pub.publicUrl }));
+      toast.success(t("company.toasts.logoUploaded"));
+    } catch (err: any) {
+      toast.error(err?.message || t("company.toasts.logoError"));
+    } finally { setUploadingLogo(false); }
+  };
+
+  const onLogoRemove = () => {
+    setValues((p) => ({ ...p, logo_url: null }));
+  };
 
   useEffect(() => {
     let alive = true;
@@ -155,6 +188,39 @@ export default function CompanyPage() {
       )}
 
       <form id="company-form" onSubmit={onSubmit} className="space-y-6">
+        <section className="surface p-5 sm:p-6">
+          <div className="mb-4">
+            <h2 className="font-serif text-xl">{t("company.sections.logo")}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{t("company.sections.logoDesc")}</p>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="h-20 w-32 rounded-md border border-border bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
+              {values.logo_url ? (
+                <img src={values.logo_url} alt="logo" className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("company.logo.empty")}</span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                className="hidden" onChange={onLogoFileChange} />
+              <div className="flex gap-2 flex-wrap">
+                <Button type="button" variant="outline" size="sm" disabled={uploadingLogo}
+                  onClick={() => fileInputRef.current?.click()} className="gap-1">
+                  <Upload className="h-4 w-4" />
+                  {uploadingLogo ? t("common.loading") : (values.logo_url ? t("company.logo.replace") : t("company.logo.upload"))}
+                </Button>
+                {values.logo_url && (
+                  <Button type="button" variant="ghost" size="sm" onClick={onLogoRemove} className="gap-1">
+                    <Trash2 className="h-4 w-4" />{t("company.logo.remove")}
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">{t("company.logo.hint")}</p>
+            </div>
+          </div>
+        </section>
+
         <Section title={t("company.sections.identity")} description={t("company.sections.identityDesc")}>
           <Field id="company_name" label={t("company.fields.company_name")} required error={errMsg("company_name")} full>
             <Input id="company_name" value={values.company_name}
