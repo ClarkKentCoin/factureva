@@ -314,6 +314,16 @@ export default function InvoiceEditorPage() {
                 </Button>
               </>
             )}
+            {!isNew && (
+              <Button variant="outline" onClick={onDownloadPdf} disabled={downloading} className="gap-1">
+                <Download className="h-4 w-4" />{t("invoices.actions.downloadPdf")}
+              </Button>
+            )}
+            {readonly && invoice.id && (
+              <Button variant="outline" onClick={() => setEmailOpen(true)} className="gap-1">
+                <Mail className="h-4 w-4" />{t("invoices.actions.sendEmail")}
+              </Button>
+            )}
             {readonly && (
               <Button variant="outline" onClick={onDuplicate} className="gap-1">
                 <Copy className="h-4 w-4" />{t("invoices.duplicate")}
@@ -327,6 +337,18 @@ export default function InvoiceEditorPage() {
         <div className="surface p-3 mb-4 text-xs text-muted-foreground flex items-start gap-2">
           <Pencil className="h-3.5 w-3.5 mt-0.5 shrink-0" />
           <span>{t("invoices.issuedHint")}</span>
+        </div>
+      )}
+
+      {lastSentAt && (
+        <div className="surface p-3 mb-4 text-xs text-muted-foreground flex items-center gap-2">
+          <Mail className="h-3.5 w-3.5 shrink-0" />
+          <span>
+            {t("invoices.email.lastSent", {
+              to: lastSentTo ?? "—",
+              when: new Date(lastSentAt).toLocaleString(locale),
+            })}
+          </span>
         </div>
       )}
 
