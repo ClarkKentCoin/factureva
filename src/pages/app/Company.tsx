@@ -69,6 +69,37 @@ export default function CompanyPage() {
   const [existing, setExisting] = useState<CompanyRow | null>(null);
   const [values, setValues] = useState<CompanyFormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const onLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !currentTenantId) return;
+    if (!/^image\/(png|jpe?g|svg\+xml|webp)$/i.test(file.type)) {
+      toast.error(t("company.toasts.logoType")); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("company.toasts.logoSize")); return;
+    }
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${currentTenantId}/logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos").upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      setValues((p) => ({ ...p, logo_url: pub.publicUrl }));
+      toast.success(t("company.toasts.logoUploaded"));
+    } catch (err: any) {
+      toast.error(err?.message || t("company.toasts.logoError"));
+    } finally { setUploadingLogo(false); }
+  };
+
+  const onLogoRemove = () => {
+    setValues((p) => ({ ...p, logo_url: null }));
+  };
 
   useEffect(() => {
     let alive = true;
