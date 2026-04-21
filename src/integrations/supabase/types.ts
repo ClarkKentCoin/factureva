@@ -563,6 +563,57 @@ export type Database = {
           },
         ]
       }
+      invoice_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_id: string
+          method: Database["public"]["Enums"]["payment_method"]
+          note: string | null
+          payment_date: string
+          tenant_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          payment_date?: string
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          payment_date?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           cancelled_at: string | null
@@ -584,6 +635,7 @@ export type Database = {
           legal_requirements_snapshot: Json
           notes: string | null
           operation_type: string | null
+          paid_amount: number
           seller_snapshot: Json
           status: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht: number
@@ -613,6 +665,7 @@ export type Database = {
           legal_requirements_snapshot?: Json
           notes?: string | null
           operation_type?: string | null
+          paid_amount?: number
           seller_snapshot?: Json
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht?: number
@@ -642,6 +695,7 @@ export type Database = {
           legal_requirements_snapshot?: Json
           notes?: string | null
           operation_type?: string | null
+          paid_amount?: number
           seller_snapshot?: Json
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht?: number
@@ -1169,6 +1223,14 @@ export type Database = {
       item_type: "service" | "good" | "mixed"
       legal_entity_type: "individual" | "company"
       nature_of_activity: "commerciale" | "artisanale" | "liberale" | "agricole"
+      payment_method:
+        | "bank_transfer"
+        | "card"
+        | "cash"
+        | "check"
+        | "paypal"
+        | "stripe"
+        | "other"
       tenant_role: "owner" | "admin" | "member" | "viewer"
       vat_regime:
         | "franchise_base"
@@ -1346,6 +1408,15 @@ export const Constants = {
       item_type: ["service", "good", "mixed"],
       legal_entity_type: ["individual", "company"],
       nature_of_activity: ["commerciale", "artisanale", "liberale", "agricole"],
+      payment_method: [
+        "bank_transfer",
+        "card",
+        "cash",
+        "check",
+        "paypal",
+        "stripe",
+        "other",
+      ],
       tenant_role: ["owner", "admin", "member", "viewer"],
       vat_regime: [
         "franchise_base",

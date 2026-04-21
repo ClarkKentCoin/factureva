@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy, Download, Mail } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy, Download, Mail, Wallet, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
@@ -23,7 +23,9 @@ import { computeInvoiceTotals, formatMoney } from "@/lib/invoice-totals";
 import { loadPrimaryCompany, type CompanyRow } from "@/lib/company-profile";
 import InvoicePreview, { type PreviewClient, type PreviewCompany } from "@/components/invoices/InvoicePreview";
 import SendInvoiceEmailDialog from "@/components/invoices/SendInvoiceEmailDialog";
+import RecordPaymentDialog from "@/components/invoices/RecordPaymentDialog";
 import { renderInvoicePdf, downloadBlob } from "@/lib/invoice-pdf";
+import { listPayments, computeVisibleStatus, balanceDue, deletePayment, type PaymentRow } from "@/lib/payments";
 
 type ClientLite = { id: string; display_name: string };
 type ItemLite = {
@@ -73,6 +75,9 @@ export default function InvoiceEditorPage() {
   const [downloading, setDownloading] = useState(false);
   const [lastSentAt, setLastSentAt] = useState<string | null>(null);
   const [lastSentTo, setLastSentTo] = useState<string | null>(null);
+  const [paidAmount, setPaidAmount] = useState(0);
+  const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const offscreenRef = useRef<HTMLDivElement | null>(null);
 
@@ -117,12 +122,14 @@ export default function InvoiceEditorPage() {
           })) : [newEmptyLine(0)]);
           setLastSentAt((inv as { last_sent_at?: string | null }).last_sent_at ?? null);
           setLastSentTo((inv as { last_sent_to?: string | null }).last_sent_to ?? null);
+          setPaidAmount(Number((inv as { paid_amount?: number }).paid_amount ?? 0));
           // For issued/cancelled: prefer the frozen snapshot
           if (inv.status !== "draft") {
             setSnapshotSeller((inv.seller_snapshot ?? null) as PreviewCompany | null);
             setSnapshotClient((inv.client_snapshot ?? null) as PreviewClient | null);
             const snap = (inv.legal_requirements_snapshot ?? {}) as { legal_mentions?: { key: string; reason: string }[] };
             if (snap.legal_mentions) setLegalMentions(snap.legal_mentions);
+            try { setPayments(await listPayments(inv.id)); } catch { /* noop */ }
           }
         }
       } catch { toast.error(t("common.loadError")); }
@@ -147,6 +154,29 @@ export default function InvoiceEditorPage() {
 
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
   const readonly = status !== "draft";
+  const visibleStatus = computeVisibleStatus(status, invoice.due_date, paidAmount, totals.total_ttc);
+  const due = balanceDue(totals.total_ttc, paidAmount);
+  const canRecordPayment = (status === "issued" || status === "paid") && !!invoice.id;
+
+  const refreshPayments = async () => {
+    if (!invoice.id) return;
+    try {
+      const [pays, { data: inv }] = await Promise.all([
+        listPayments(invoice.id),
+        supabase.from("invoices").select("paid_amount, status").eq("id", invoice.id).maybeSingle(),
+      ]);
+      setPayments(pays);
+      if (inv) {
+        setPaidAmount(Number((inv as { paid_amount?: number }).paid_amount ?? 0));
+        setStatus((inv as { status: InvoiceStatus }).status);
+      }
+    } catch { /* noop */ }
+  };
+
+  const onDeletePayment = async (pid: string) => {
+    try { await deletePayment(pid); toast.success(t("invoices.payments.toasts.deleted")); refreshPayments(); }
+    catch { toast.error(t("common.saveError")); }
+  };
 
   const previewCompany: PreviewCompany | null = readonly ? snapshotSeller : (company ? {
     logo_url: company.logo_url,
@@ -301,8 +331,14 @@ export default function InvoiceEditorPage() {
         description={readonly ? t("invoices.readonlyDescription") : t("invoices.editorDescription")}
         actions={
           <div className="flex flex-wrap gap-2">
-            <Badge variant={status === "draft" ? "secondary" : status === "cancelled" ? "outline" : "default"}>
-              {t(`invoices.status.${status}`)}
+            <Badge variant={
+              visibleStatus === "paid" ? "default"
+              : visibleStatus === "overdue" ? "destructive"
+              : visibleStatus === "draft" ? "secondary"
+              : visibleStatus === "cancelled" ? "outline"
+              : "default"
+            }>
+              {t(`invoices.status.${visibleStatus}`)}
             </Badge>
             {!readonly && (
               <>
@@ -313,6 +349,11 @@ export default function InvoiceEditorPage() {
                   <Send className="h-4 w-4" />{t("invoices.actions.issue")}
                 </Button>
               </>
+            )}
+            {canRecordPayment && due > 0 && (
+              <Button onClick={() => setPaymentOpen(true)} className="gap-1">
+                <Wallet className="h-4 w-4" />{t("invoices.payments.actions.record")}
+              </Button>
             )}
             {!isNew && (
               <Button variant="outline" onClick={onDownloadPdf} disabled={downloading} className="gap-1">
@@ -349,6 +390,47 @@ export default function InvoiceEditorPage() {
               when: new Date(lastSentAt).toLocaleString(locale),
             })}
           </span>
+        </div>
+      )}
+
+      {visibleStatus === "overdue" && (
+        <div className="surface p-3 mb-4 text-xs flex items-center gap-2 border-destructive/40 text-destructive">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          <span>{t("invoices.payments.overdueNotice")}</span>
+        </div>
+      )}
+
+      {(status === "issued" || status === "paid") && (
+        <div className="surface p-5 mb-4">
+          <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+            <h2 className="font-serif text-lg flex items-center gap-2">
+              <Wallet className="h-4 w-4" />{t("invoices.payments.sectionTitle")}
+            </h2>
+            <div className="text-sm text-muted-foreground">
+              <span className="mr-3">{t("invoices.payments.paidLabel")}: <span className="font-mono text-foreground">{formatMoney(paidAmount, invoice.currency_code, locale)}</span></span>
+              <span>{t("invoices.payments.dueLabel")}: <span className="font-mono text-foreground">{formatMoney(due, invoice.currency_code, locale)}</span></span>
+            </div>
+          </div>
+          {payments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("invoices.payments.empty")}</p>
+          ) : (
+            <ul className="divide-y divide-border text-sm">
+              {payments.map((p) => (
+                <li key={p.id} className="py-2 flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <div className="font-mono">{formatMoney(Number(p.amount), invoice.currency_code, locale)}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(p.payment_date).toLocaleDateString(locale)} · {t(`invoices.payments.method.${p.method}`)}
+                      {p.note && <> · {p.note}</>}
+                    </div>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => onDeletePayment(p.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -558,6 +640,17 @@ export default function InvoiceEditorPage() {
           setLastSentTo(to);
         }}
       />
+
+      {invoice.id && currentTenantId && (
+        <RecordPaymentDialog
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          invoiceId={invoice.id}
+          tenantId={currentTenantId}
+          defaultAmount={due}
+          onRecorded={refreshPayments}
+        />
+      )}
     </PageBody>
   );
 }
