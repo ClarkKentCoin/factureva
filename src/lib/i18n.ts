@@ -358,6 +358,8 @@ const resources = {
           issue: "Émettre la facture",
           addLine: "Ajouter une ligne",
           preview: "Aperçu",
+          downloadPdf: "Télécharger le PDF",
+          sendEmail: "Envoyer par e-mail",
         },
         toasts: {
           saved: "Brouillon enregistré.",
@@ -368,6 +370,37 @@ const resources = {
         errors: {
           clientRequired: "Sélectionnez un client avant d'émettre la facture.",
           linesRequired: "Ajoutez au moins une ligne avec un libellé.",
+        },
+        pdf: {
+          toasts: { downloaded: "PDF téléchargé." },
+          errors: { generateFailed: "Impossible de générer le PDF." },
+        },
+        email: {
+          title: "Envoyer la facture par e-mail",
+          description: "Le PDF de la facture sera joint automatiquement.",
+          sentBadge: "Envoyée",
+          lastSent: "Dernier envoi à {{to}} le {{when}}",
+          attachmentNote: "Le PDF est généré et joint à l'envoi.",
+          fields: {
+            recipient: "Destinataire",
+            cc: "Copie (CC)",
+            ccPlaceholder: "Optionnel",
+            subject: "Objet",
+            body: "Message",
+          },
+          defaults: {
+            subject: "Facture {{number}} — {{company}}",
+            body: "Bonjour,\n\nVeuillez trouver ci-joint la facture {{number}}.\n\nCordialement,\n{{company}}",
+          },
+          actions: { send: "Envoyer" },
+          toasts: { sent: "Facture envoyée à {{to}}." },
+          errors: {
+            recipientInvalid: "Adresse e-mail du destinataire invalide.",
+            ccInvalid: "Adresse e-mail en copie invalide.",
+            subjectRequired: "L'objet est requis.",
+            sendFailed: "Échec de l'envoi de l'e-mail.",
+            providerMissing: "Service d'e-mail non configuré. Contactez l'administrateur.",
+          },
         },
       },
       notFound: { message: "Oups ! Page introuvable", back: "Retour à l'accueil" },
@@ -643,6 +676,8 @@ const resources = {
         actions: {
           saveDraft: "Save draft", issue: "Issue invoice", addLine: "Add line",
           preview: "Preview",
+          downloadPdf: "Download PDF",
+          sendEmail: "Send by email",
         },
         toasts: {
           saved: "Draft saved.",
@@ -653,6 +688,37 @@ const resources = {
         errors: {
           clientRequired: "Select a client before issuing the invoice.",
           linesRequired: "Add at least one line with a label.",
+        },
+        pdf: {
+          toasts: { downloaded: "PDF downloaded." },
+          errors: { generateFailed: "Could not generate the PDF." },
+        },
+        email: {
+          title: "Send invoice by email",
+          description: "The invoice PDF will be attached automatically.",
+          sentBadge: "Sent",
+          lastSent: "Last sent to {{to}} on {{when}}",
+          attachmentNote: "The PDF is generated and attached to the email.",
+          fields: {
+            recipient: "Recipient",
+            cc: "CC",
+            ccPlaceholder: "Optional",
+            subject: "Subject",
+            body: "Message",
+          },
+          defaults: {
+            subject: "Invoice {{number}} — {{company}}",
+            body: "Hello,\n\nPlease find attached invoice {{number}}.\n\nBest regards,\n{{company}}",
+          },
+          actions: { send: "Send" },
+          toasts: { sent: "Invoice sent to {{to}}." },
+          errors: {
+            recipientInvalid: "Recipient email address is invalid.",
+            ccInvalid: "CC email address is invalid.",
+            subjectRequired: "Subject is required.",
+            sendFailed: "Failed to send the email.",
+            providerMissing: "Email provider not configured. Contact the administrator.",
+          },
         },
       },
       notFound: { message: "Oops! Page not found", back: "Return to Home" },
@@ -929,6 +995,8 @@ const resources = {
         actions: {
           saveDraft: "Сохранить черновик", issue: "Выпустить счёт", addLine: "Добавить строку",
           preview: "Предпросмотр",
+          downloadPdf: "Скачать PDF",
+          sendEmail: "Отправить по эл. почте",
         },
         toasts: {
           saved: "Черновик сохранён.",
@@ -939,6 +1007,37 @@ const resources = {
         errors: {
           clientRequired: "Выберите клиента перед выпуском счёта.",
           linesRequired: "Добавьте хотя бы одну строку с названием.",
+        },
+        pdf: {
+          toasts: { downloaded: "PDF скачан." },
+          errors: { generateFailed: "Не удалось сгенерировать PDF." },
+        },
+        email: {
+          title: "Отправить счёт по эл. почте",
+          description: "PDF счёта будет прикреплён автоматически.",
+          sentBadge: "Отправлен",
+          lastSent: "Последняя отправка: {{to}}, {{when}}",
+          attachmentNote: "PDF сгенерируется и прикрепится к письму.",
+          fields: {
+            recipient: "Получатель",
+            cc: "Копия (CC)",
+            ccPlaceholder: "Необязательно",
+            subject: "Тема",
+            body: "Сообщение",
+          },
+          defaults: {
+            subject: "Счёт {{number}} — {{company}}",
+            body: "Здравствуйте,\n\nВ приложении счёт {{number}}.\n\nС уважением,\n{{company}}",
+          },
+          actions: { send: "Отправить" },
+          toasts: { sent: "Счёт отправлен: {{to}}." },
+          errors: {
+            recipientInvalid: "Неверный адрес получателя.",
+            ccInvalid: "Неверный адрес в копии.",
+            subjectRequired: "Укажите тему.",
+            sendFailed: "Не удалось отправить письмо.",
+            providerMissing: "Сервис почты не настроен. Обратитесь к администратору.",
+          },
         },
       },
       notFound: { message: "Упс! Страница не найдена", back: "На главную" },
