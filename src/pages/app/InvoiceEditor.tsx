@@ -122,12 +122,14 @@ export default function InvoiceEditorPage() {
           })) : [newEmptyLine(0)]);
           setLastSentAt((inv as { last_sent_at?: string | null }).last_sent_at ?? null);
           setLastSentTo((inv as { last_sent_to?: string | null }).last_sent_to ?? null);
+          setPaidAmount(Number((inv as { paid_amount?: number }).paid_amount ?? 0));
           // For issued/cancelled: prefer the frozen snapshot
           if (inv.status !== "draft") {
             setSnapshotSeller((inv.seller_snapshot ?? null) as PreviewCompany | null);
             setSnapshotClient((inv.client_snapshot ?? null) as PreviewClient | null);
             const snap = (inv.legal_requirements_snapshot ?? {}) as { legal_mentions?: { key: string; reason: string }[] };
             if (snap.legal_mentions) setLegalMentions(snap.legal_mentions);
+            try { setPayments(await listPayments(inv.id)); } catch { /* noop */ }
           }
         }
       } catch { toast.error(t("common.loadError")); }
