@@ -376,6 +376,236 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_lines: {
+        Row: {
+          activity_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          invoice_id: string
+          item_id: string | null
+          item_type: Database["public"]["Enums"]["item_type"] | null
+          label: string
+          line_subtotal_ht: number
+          line_total_ttc: number
+          line_vat_amount: number
+          quantity: number
+          sort_order: number
+          tenant_id: string
+          unit: string | null
+          unit_price: number
+          vat_rate: number
+        }
+        Insert: {
+          activity_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id: string
+          item_id?: string | null
+          item_type?: Database["public"]["Enums"]["item_type"] | null
+          label: string
+          line_subtotal_ht?: number
+          line_total_ttc?: number
+          line_vat_amount?: number
+          quantity?: number
+          sort_order?: number
+          tenant_id: string
+          unit?: string | null
+          unit_price?: number
+          vat_rate?: number
+        }
+        Update: {
+          activity_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string
+          item_id?: string | null
+          item_type?: Database["public"]["Enums"]["item_type"] | null
+          label?: string
+          line_subtotal_ht?: number
+          line_total_ttc?: number
+          line_vat_amount?: number
+          quantity?: number
+          sort_order?: number
+          tenant_id?: string
+          unit?: string | null
+          unit_price?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_number_sequences: {
+        Row: {
+          document_type: Database["public"]["Enums"]["invoice_document_type"]
+          id: string
+          last_value: number
+          tenant_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          document_type?: Database["public"]["Enums"]["invoice_document_type"]
+          id?: string
+          last_value?: number
+          tenant_id: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          document_type?: Database["public"]["Enums"]["invoice_document_type"]
+          id?: string
+          last_value?: number
+          tenant_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_number_sequences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          cancelled_at: string | null
+          client_id: string | null
+          client_snapshot: Json
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          currency_code: string
+          document_language: Database["public"]["Enums"]["document_language"]
+          document_type: Database["public"]["Enums"]["invoice_document_type"]
+          due_date: string | null
+          id: string
+          invoice_number: string | null
+          issue_date: string | null
+          issued_at: string | null
+          legal_requirements_snapshot: Json
+          notes: string | null
+          operation_type: string | null
+          seller_snapshot: Json
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal_ht: number
+          tenant_id: string
+          total_ttc: number
+          total_vat: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          client_id?: string | null
+          client_snapshot?: Json
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          document_language?: Database["public"]["Enums"]["document_language"]
+          document_type?: Database["public"]["Enums"]["invoice_document_type"]
+          due_date?: string | null
+          id?: string
+          invoice_number?: string | null
+          issue_date?: string | null
+          issued_at?: string | null
+          legal_requirements_snapshot?: Json
+          notes?: string | null
+          operation_type?: string | null
+          seller_snapshot?: Json
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal_ht?: number
+          tenant_id: string
+          total_ttc?: number
+          total_vat?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          client_id?: string | null
+          client_snapshot?: Json
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          document_language?: Database["public"]["Enums"]["document_language"]
+          document_type?: Database["public"]["Enums"]["invoice_document_type"]
+          due_date?: string | null
+          id?: string
+          invoice_number?: string | null
+          issue_date?: string | null
+          issued_at?: string | null
+          legal_requirements_snapshot?: Json
+          notes?: string | null
+          operation_type?: string | null
+          seller_snapshot?: Json
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal_ht?: number
+          tenant_id?: string
+          total_ttc?: number
+          total_vat?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       items: {
         Row: {
           accounting_category: string | null
@@ -799,6 +1029,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_invoice_number: {
+        Args: {
+          _document_type: Database["public"]["Enums"]["invoice_document_type"]
+          _tenant_id: string
+          _year: number
+        }
+        Returns: string
+      }
       create_initial_tenant: { Args: { _name: string }; Returns: string }
       has_role: {
         Args: {
@@ -857,6 +1095,8 @@ export type Database = {
         | "franchise_base_tva"
         | "other"
       interface_language: "fr" | "en" | "ru"
+      invoice_document_type: "invoice"
+      invoice_status: "draft" | "issued" | "paid" | "overdue" | "cancelled"
       item_type: "service" | "good" | "mixed"
       legal_entity_type: "individual" | "company"
       nature_of_activity: "commerciale" | "artisanale" | "liberale" | "agricole"
@@ -1032,6 +1272,8 @@ export const Constants = {
         "other",
       ],
       interface_language: ["fr", "en", "ru"],
+      invoice_document_type: ["invoice"],
+      invoice_status: ["draft", "issued", "paid", "overdue", "cancelled"],
       item_type: ["service", "good", "mixed"],
       legal_entity_type: ["individual", "company"],
       nature_of_activity: ["commerciale", "artisanale", "liberale", "agricole"],
