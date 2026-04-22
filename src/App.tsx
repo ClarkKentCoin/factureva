@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { AuthProvider } from "@/lib/auth-context";
 import { EntitlementsProvider } from "@/hooks/use-entitlements";
-import { RequireAuth, RequireSuperAdmin, RequireTenant, GuestOnly } from "@/lib/route-guards";
+import { RequireAuth, RequireSuperAdmin, RequireTenant, GuestOnly, PostLoginRedirect } from "@/lib/route-guards";
 import { AppShell } from "@/components/layout/AppShell";
 import { SuperAdminShell } from "@/components/layout/SuperAdminShell";
 

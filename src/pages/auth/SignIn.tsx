@@ -23,7 +23,7 @@ export default function SignIn() {
     if (error) return toast.error(error.message);
     // GuestOnly + PostLoginRedirect on `/` will route correctly:
     // super_admin → /superadmin, tenant user → /app, no tenant → /onboarding.
-    nav("/", { replace: true });
+    nav("/post-login", { replace: true });
   };
 
   return (
