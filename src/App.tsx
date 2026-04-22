@@ -26,6 +26,8 @@ import ClientsPage from "./pages/app/Clients";
 import ItemsPage from "./pages/app/Items";
 import ActivitiesPage from "./pages/app/Activities";
 import PlanPage from "./pages/app/Plan";
+import TeamPage from "./pages/app/Team";
+import AcceptInvitePage from "./pages/auth/AcceptInvite";
 import SuperAdminOverview from "./pages/superadmin/Overview";
 import SuperAdminTenants from "./pages/superadmin/Tenants";
 import SuperAdminTenantDetail from "./pages/superadmin/TenantDetail";
