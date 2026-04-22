@@ -67,15 +67,21 @@ export async function deletePayment(paymentId: string): Promise<void> {
   if (error) throw error;
 }
 
-/** Computed visible status: applies the "overdue" rule on top of stored status. */
+/**
+ * Computed visible status. Applies "overdue" on top of stored status, and
+ * treats `paid_amount + credited_amount >= total_ttc` as fully settled (paid).
+ * `credited_amount` defaults to 0 to keep existing call sites working.
+ */
 export function computeVisibleStatus(
   status: Database["public"]["Enums"]["invoice_status"],
   due_date: string | null,
   paid_amount: number,
   total_ttc: number,
+  credited_amount: number = 0,
 ): Database["public"]["Enums"]["invoice_status"] {
   if (status !== "issued") return status;
-  if (paid_amount >= total_ttc && total_ttc > 0) return "paid";
+  const settled = paid_amount + credited_amount;
+  if (settled >= total_ttc && total_ttc > 0) return "paid";
   if (!due_date) return "issued";
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const due = new Date(due_date); due.setHours(0, 0, 0, 0);
@@ -83,6 +89,7 @@ export function computeVisibleStatus(
   return "issued";
 }
 
-export function balanceDue(total_ttc: number, paid_amount: number): number {
-  return Math.max(0, Math.round((total_ttc - paid_amount) * 100) / 100);
+/** Remaining due, considering both payments and credit notes. */
+export function balanceDue(total_ttc: number, paid_amount: number, credited_amount: number = 0): number {
+  return Math.max(0, Math.round((total_ttc - paid_amount - credited_amount) * 100) / 100);
 }

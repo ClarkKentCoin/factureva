@@ -44,15 +44,19 @@ type Props = {
   company: PreviewCompany | null;
   client: PreviewClient | null;
   legalMentions?: { key: string; reason: string }[];
-  /** "invoice" (default) or "devis" — controls title + status namespace + date label. */
-  kind?: "invoice" | "devis";
+  /** "invoice" (default), "devis" or "credit_note" — controls title + status namespace + date label. */
+  kind?: "invoice" | "devis" | "credit_note";
   /** Optional client-signature image URL — only rendered when kind === "devis". */
   clientSignatureUrl?: string | null;
+  /** When kind === "credit_note": reference to the source invoice (number + date). */
+  sourceInvoice?: { number: string | null; issue_date: string | null } | null;
+  /** Optional correction reason text shown on the credit note PDF/preview. */
+  correctionReason?: string | null;
 };
 
 export default function InvoicePreview({
   invoice, lines, number, status, company, client, legalMentions = [], kind = "invoice",
-  clientSignatureUrl = null,
+  clientSignatureUrl = null, sourceInvoice = null, correctionReason = null,
 }: Props) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
@@ -62,6 +66,7 @@ export default function InvoicePreview({
   const fmt = (n: number) => formatMoney(n, invoice.currency_code, locale);
   const fmtDate = (s?: string | null) => (s ? new Date(s).toLocaleDateString(locale) : "—");
   const isDevis = kind === "devis";
+  const isCreditNote = kind === "credit_note";
 
   const companyLines = [
     company?.legal_name && company?.legal_name !== company?.company_name ? company.legal_name : null,
