@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy, Download, Mail, Wallet, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy, Download, Mail, Wallet, AlertTriangle, FileMinus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
@@ -26,6 +26,9 @@ import SendInvoiceEmailDialog from "@/components/invoices/SendInvoiceEmailDialog
 import RecordPaymentDialog from "@/components/invoices/RecordPaymentDialog";
 import { renderInvoicePdf, downloadBlob } from "@/lib/invoice-pdf";
 import { listPayments, computeVisibleStatus, balanceDue, deletePayment, type PaymentRow } from "@/lib/payments";
+import { listCreditsForInvoice, sumIssuedCreditsForInvoice } from "@/lib/credit-notes";
+import { useEntitlements } from "@/hooks/use-entitlements";
+import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
 
 type ClientLite = { id: string; display_name: string };
 type ItemLite = {
