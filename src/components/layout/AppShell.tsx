@@ -149,8 +149,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Desktop sidebar */}
-      <div className="hidden md:flex">{Sidebar}</div>
+      {/* Desktop sidebar — sticky full-height so footer (lang/email/logout) stays visible */}
+      <div className="hidden md:flex sticky top-0 h-screen self-start">{Sidebar}</div>
 
       {/* Mobile drawer */}
       {open && (
