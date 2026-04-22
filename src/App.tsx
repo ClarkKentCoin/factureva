@@ -49,6 +49,9 @@ const App = () => (
             <Route path="/auth/sign-in" element={<GuestOnly><SignIn /></GuestOnly>} />
             <Route path="/auth/sign-up" element={<GuestOnly><SignUp /></GuestOnly>} />
 
+            {/* Post-login dispatcher: routes super_admin → /superadmin, tenant user → /app, no tenant → /onboarding */}
+            <Route path="/post-login" element={<RequireAuth><PostLoginRedirect /></RequireAuth>} />
+
             {/* Onboarding (authed but tenant not required) */}
             <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />
 
