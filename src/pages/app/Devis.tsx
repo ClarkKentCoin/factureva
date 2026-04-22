@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, FileText, Copy, Ban, ArrowRightLeft } from "lucide-react";
+import { Plus, FileText, Copy, Ban, ArrowRightLeft, Lock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { useEntitlements } from "@/hooks/use-entitlements";
+import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
 import { PageBody, PageHeader, EmptyState } from "@/components/layout/PageScaffold";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,11 +29,18 @@ const PAGE_SIZE = 20;
 export default function DevisPage() {
   const { t, i18n } = useTranslation();
   const { currentTenantId, user } = useAuth();
+  const { hasFeature } = useEntitlements();
+  const canCreate = hasFeature("quotes.create");
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<DocFilters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  const handleNewClick = (e: React.MouseEvent) => {
+    if (!canCreate) { e.preventDefault(); setUpgradeOpen(true); }
+  };
 
   const load = async () => {
     if (!currentTenantId) return;
@@ -127,19 +136,29 @@ export default function DevisPage() {
         title={t("devis.title")}
         description={t("devis.description")}
         actions={
-          <Button asChild className="gap-2">
-            <Link to="/app/devis/new"><Plus className="h-4 w-4" />{t("devis.new")}</Link>
+          <Button asChild={canCreate} className="gap-2" onClick={canCreate ? undefined : () => setUpgradeOpen(true)}>
+            {canCreate ? (
+              <Link to="/app/devis/new"><Plus className="h-4 w-4" />{t("devis.new")}</Link>
+            ) : (
+              <span className="inline-flex items-center gap-2"><Lock className="h-4 w-4" />{t("devis.new")}</span>
+            )}
           </Button>
         }
       />
+
+      <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} featureKeyPrefix="billing.gates.devis" />
 
       {loading ? (
         <div className="surface p-6 text-sm text-muted-foreground">{t("common.loading")}</div>
       ) : rows.length === 0 ? (
         <EmptyState
           title={t("devis.emptyTitle")}
-          description={t("devis.emptyDescription")}
-          action={<Button asChild><Link to="/app/devis/new">{t("devis.new")}</Link></Button>}
+          description={canCreate ? t("devis.emptyDescription") : t("billing.gates.devis.description")}
+          action={
+            canCreate
+              ? <Button asChild><Link to="/app/devis/new" onClick={handleNewClick}>{t("devis.new")}</Link></Button>
+              : <Button onClick={() => setUpgradeOpen(true)} className="gap-2"><Lock className="h-4 w-4" />{t("billing.upgrade.cta")}</Button>
+          }
         />
       ) : (
         <>

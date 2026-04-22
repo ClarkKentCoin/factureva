@@ -18,6 +18,7 @@ const resources = {
         settings: "Paramètres",
         signOut: "Se déconnecter",
         superadmin: "Superadmin",
+        plan: "Abonnement",
       },
       landing: {
         heroSubtitle: "Factures, devis, clients, paiements. Conçu pour la France — pensé pour l'international.",
@@ -537,6 +538,40 @@ const resources = {
           errors: { type: "Format non supporté (PNG, JPG, SVG, WEBP).", size: "Fichier trop volumineux (max 2 Mo).", upload: "Échec du téléversement de la signature." },
         },
       },
+      billing: {
+        title: "Abonnement",
+        description: "Gérez votre formule et consultez les fonctionnalités incluses.",
+        currentPlan: "Formule actuelle",
+        noPlan: "Aucune formule assignée",
+        contactNote: "Le paiement en ligne arrive bientôt. Contactez-nous pour mettre à niveau dès aujourd'hui.",
+        cards: { current: "Actuelle", popular: "Populaire", comingSoon: "Bientôt" },
+        upgrade: { cta: "Passer à une formule supérieure", later: "Plus tard" },
+        gates: {
+          devis: {
+            title: "Les devis sont une fonctionnalité premium",
+            description: "La création de nouveaux devis est incluse dans les formules payantes. Les devis existants restent accessibles.",
+          },
+        },
+        features: {
+          "invoices.create": "Création de factures",
+          "invoices.pdf_export": "Export PDF",
+          "invoices.send_email": "Envoi par e-mail",
+          "quotes.create": "Devis",
+          "credit_notes.create": "Avoirs",
+          "reminders.send": "Relances de paiement",
+          "branding.custom": "Branding personnalisé",
+          "reports.advanced": "Rapports avancés",
+          "company.multiple_entities": "Plusieurs entités légales",
+          "api.access": "Accès API",
+        },
+        limits: {
+          "limit.max_clients": "Clients",
+          "limit.max_invoices_per_month": "Factures / mois",
+          "limit.max_users": "Utilisateurs",
+          "limit.max_legal_entities": "Entités légales",
+          "limit.max_storage_mb": "Stockage (Mo)",
+        },
+      },
       lists: {
         searchPlaceholder: "Rechercher par numéro, client, montant…",
         filters: "Filtres",
@@ -567,7 +602,7 @@ const resources = {
       nav: {
         dashboard: "Dashboard", invoices: "Invoices", devis: "Quotes", clients: "Clients",
         company: "Company", items: "Catalog", activities: "Activities",
-        settings: "Settings", signOut: "Sign out", superadmin: "Superadmin",
+        settings: "Settings", signOut: "Sign out", superadmin: "Superadmin", plan: "Plan",
       },
       landing: {
         heroSubtitle: "Invoices, quotes, clients, payments. Built for France — designed for international.",
@@ -1007,6 +1042,40 @@ const resources = {
           errors: { type: "Unsupported format (PNG, JPG, SVG, WEBP).", size: "File too large (max 2 MB).", upload: "Failed to upload signature." },
         },
       },
+      billing: {
+        title: "Plan & billing",
+        description: "Manage your plan and see what your workspace is entitled to.",
+        currentPlan: "Current plan",
+        noPlan: "No plan assigned",
+        contactNote: "Online checkout coming soon. Contact us to upgrade in the meantime.",
+        cards: { current: "Current", popular: "Popular", comingSoon: "Coming soon" },
+        upgrade: { cta: "Upgrade plan", later: "Maybe later" },
+        gates: {
+          devis: {
+            title: "Quotes are a premium feature",
+            description: "Creating new quotes (devis) is included in paid plans. Existing quotes remain accessible.",
+          },
+        },
+        features: {
+          "invoices.create": "Create invoices",
+          "invoices.pdf_export": "PDF export",
+          "invoices.send_email": "Send by email",
+          "quotes.create": "Quotes (devis)",
+          "credit_notes.create": "Credit notes",
+          "reminders.send": "Payment reminders",
+          "branding.custom": "Custom branding",
+          "reports.advanced": "Advanced reports",
+          "company.multiple_entities": "Multiple legal entities",
+          "api.access": "API access",
+        },
+        limits: {
+          "limit.max_clients": "Clients",
+          "limit.max_invoices_per_month": "Invoices / month",
+          "limit.max_users": "Users",
+          "limit.max_legal_entities": "Legal entities",
+          "limit.max_storage_mb": "Storage (MB)",
+        },
+      },
       lists: {
         searchPlaceholder: "Search number, client, amount…",
         filters: "Filters",
@@ -1037,7 +1106,7 @@ const resources = {
       nav: {
         dashboard: "Дашборд", invoices: "Счета", devis: "Сметы", clients: "Клиенты",
         company: "Компания", items: "Каталог", activities: "Виды деятельности",
-        settings: "Настройки", signOut: "Выйти", superadmin: "Суперадмин",
+        settings: "Настройки", signOut: "Выйти", superadmin: "Суперадмин", plan: "Тариф",
       },
       landing: {
         heroSubtitle: "Счета, сметы, клиенты, платежи. Создано для Франции — с прицелом на мир.",
@@ -1476,6 +1545,40 @@ const resources = {
           remove: "Удалить",
           toasts: { uploaded: "Подпись клиента сохранена.", removed: "Подпись клиента удалена." },
           errors: { type: "Неподдерживаемый формат (PNG, JPG, SVG, WEBP).", size: "Файл слишком большой (макс. 2 МБ).", upload: "Не удалось загрузить подпись." },
+        },
+      },
+      billing: {
+        title: "Abonnement",
+        description: "Управляйте своим тарифом и узнайте, что доступно вашему рабочему пространству.",
+        currentPlan: "Текущий тариф",
+        noPlan: "Тариф не назначен",
+        contactNote: "Онлайн-оплата скоро появится. Свяжитесь с нами для перехода на платный тариф.",
+        cards: { current: "Текущий", popular: "Популярный", comingSoon: "Скоро" },
+        upgrade: { cta: "Перейти на платный тариф", later: "Позже" },
+        gates: {
+          devis: {
+            title: "Devis — премиум-функция",
+            description: "Создание коммерческих предложений входит в платные тарифы. Существующие devis остаются доступны.",
+          },
+        },
+        features: {
+          "invoices.create": "Создание счетов",
+          "invoices.pdf_export": "Экспорт PDF",
+          "invoices.send_email": "Отправка по e-mail",
+          "quotes.create": "Devis (предложения)",
+          "credit_notes.create": "Кредит-ноты",
+          "reminders.send": "Напоминания об оплате",
+          "branding.custom": "Свой брендинг",
+          "reports.advanced": "Расширенные отчёты",
+          "company.multiple_entities": "Несколько юр. лиц",
+          "api.access": "Доступ к API",
+        },
+        limits: {
+          "limit.max_clients": "Клиенты",
+          "limit.max_invoices_per_month": "Счетов в месяц",
+          "limit.max_users": "Пользователи",
+          "limit.max_legal_entities": "Юр. лица",
+          "limit.max_storage_mb": "Хранилище (МБ)",
         },
       },
       lists: {

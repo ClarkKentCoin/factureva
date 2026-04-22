@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FileText, FileSignature, Users, Building2, Package,
-  Briefcase, Settings, LogOut, Menu, X, ShieldCheck, Globe, Plus, ChevronsUpDown, Check,
+  Briefcase, Settings, LogOut, Menu, X, ShieldCheck, Globe, Plus, ChevronsUpDown, Check, Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth-context";
@@ -29,6 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/app/items", label: t("nav.items"), icon: Package },
     { to: "/app/activities", label: t("nav.activities"), icon: Briefcase },
     { to: "/app/company", label: t("nav.company"), icon: Building2 },
+    { to: "/app/settings/plan", label: t("nav.plan"), icon: Sparkles },
     { to: "/app/settings", label: t("nav.settings"), icon: Settings },
   ];
 
