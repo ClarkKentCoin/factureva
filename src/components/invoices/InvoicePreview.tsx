@@ -86,13 +86,19 @@ export default function InvoicePreview({
     client?.vat_number ? `${t("invoices.preview.vatNumberShort")} ${client.vat_number}` : null,
   ].filter(Boolean) as string[];
 
-  const documentTitle = isDevis
+  const documentTitle = isCreditNote
+    ? t("creditNotes.preview.documentTitle")
+    : isDevis
     ? t("devis.preview.documentTitle")
     : t("invoices.preview.documentTitle");
-  const dueLabel = isDevis
+  const dueLabel = isCreditNote
+    ? null
+    : isDevis
     ? t("devis.preview.validUntil")
     : t("invoices.preview.dueDate");
-  const statusLabel = isDevis
+  const statusLabel = isCreditNote
+    ? t(`creditNotes.status.${status}`, { defaultValue: status })
+    : isDevis
     ? t(`devis.status.${status}`, { defaultValue: status })
     : t(`invoices.status.${status}`, { defaultValue: status });
 
