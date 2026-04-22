@@ -367,7 +367,7 @@ export default function TeamPage() {
                 </Button>
               </>
             ) : (
-              <Button onClick={() => setInviteOpen(false)}>{t("common.done")}</Button>
+              <Button onClick={() => setInviteOpen(false)}>{t("common.done", { defaultValue: "Done" })}</Button>
             )}
           </DialogFooter>
         </DialogContent>
