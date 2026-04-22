@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 export default function SignUp() {
   const { t } = useTranslation();
   const nav = useNavigate();
+  const [params] = useSearchParams();
+  const next = params.get("next");
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
@@ -19,16 +21,18 @@ export default function SignUp() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const redirectTarget = next && next.startsWith("/") ? next : "/app";
     const { error } = await supabase.auth.signUp({
       email, password,
       options: {
-        emailRedirectTo: `${window.location.origin}/app`,
+        emailRedirectTo: `${window.location.origin}${redirectTarget}`,
         data: { full_name: fullName },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success(t("auth.accountCreated"));
+    if (next && next.startsWith("/")) return nav(next, { replace: true });
     nav("/onboarding");
   };
 
