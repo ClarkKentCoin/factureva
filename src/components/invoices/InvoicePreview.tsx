@@ -137,10 +137,23 @@ export default function InvoicePreview({
                 <span className="uppercase tracking-wide">{t("invoices.preview.issueDate")}</span>{" "}
                 <span className="text-foreground">{fmtDate(invoice.issue_date)}</span>
               </div>
-              <div>
-                <span className="uppercase tracking-wide">{dueLabel}</span>{" "}
-                <span className="text-foreground">{fmtDate(invoice.due_date)}</span>
-              </div>
+              {dueLabel && (
+                <div>
+                  <span className="uppercase tracking-wide">{dueLabel}</span>{" "}
+                  <span className="text-foreground">{fmtDate(invoice.due_date)}</span>
+                </div>
+              )}
+              {isCreditNote && sourceInvoice && (
+                <div>
+                  <span className="uppercase tracking-wide">{t("creditNotes.preview.sourceInvoice")}</span>{" "}
+                  <span className="text-foreground font-mono">
+                    {sourceInvoice.number ?? "—"}
+                  </span>
+                  {sourceInvoice.issue_date && (
+                    <> · <span className="text-foreground">{fmtDate(sourceInvoice.issue_date)}</span></>
+                  )}
+                </div>
+              )}
               <div className="uppercase tracking-wide">{statusLabel}</div>
             </div>
           </div>
