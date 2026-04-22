@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, Sparkles, Lock } from "lucide-react";
+import { Check, Sparkles, Lock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEntitlements } from "@/hooks/use-entitlements";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
@@ -22,7 +22,8 @@ type PlanFeatureRow = {
   feature: { key: string; name: string; is_limit: boolean } | null;
 };
 
-const PLAN_ORDER = ["free", "beta", "pro", "business"];
+const PLAN_ORDER = ["free", "pro", "business", "beta"];
+
 // Features highlighted on the upgrade cards (boolean-style)
 const HIGHLIGHTED_FEATURES = [
   "invoices.create",
@@ -76,7 +77,19 @@ export default function PlanPage() {
   const fmtLimit = (v: number | null) => v === null ? "—" : v >= 100000 ? "∞" : v.toLocaleString();
 
   const currentLimits = useMemo(() => snapshot?.limits ?? {}, [snapshot]);
-  const currentFeatures = useMemo(() => snapshot?.features ?? {}, [snapshot]);
+
+  // Beta is invite-only: only show it when the current tenant is on Beta.
+  const visiblePlans = useMemo(() => {
+    return plans.filter((p) => p.code !== "beta" || currentCode === "beta");
+  }, [plans, currentCode]);
+
+  // Localized plan name/description (DB seed text is ignored on purpose).
+  const planName = (code: string, fallback: string) =>
+    t(`billing.plans.${code}.name`, { defaultValue: fallback });
+  const planSubtitle = (code: string) =>
+    t(`billing.plans.${code}.subtitle`, { defaultValue: "" });
+  const planDescription = (code: string, fallback: string | null) =>
+    t(`billing.plans.${code}.description`, { defaultValue: fallback ?? "" });
 
   return (
     <PageBody>
@@ -92,17 +105,25 @@ export default function PlanPage() {
             <div className="text-xs uppercase tracking-wide text-muted-foreground">
               {t("billing.currentPlan")}
             </div>
-            <div className="font-serif text-2xl mt-1 flex items-center gap-2">
-              {snapshot?.plan?.name ?? t("billing.noPlan")}
+            <div className="font-serif text-2xl mt-1 flex items-center gap-2 flex-wrap">
+              {snapshot?.plan
+                ? planName(snapshot.plan.code, snapshot.plan.name)
+                : t("billing.noPlan")}
+              {snapshot?.plan?.code === "beta" && (
+                <Badge variant="secondary" className="gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  {t("billing.cards.betaBadge")}
+                </Badge>
+              )}
               {snapshot?.subscriptionStatus && (
                 <Badge variant="outline" className="capitalize">
                   {snapshot.subscriptionStatus}
                 </Badge>
               )}
             </div>
-            {snapshot?.plan?.description && (
+            {snapshot?.plan && (
               <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                {snapshot.plan.description}
+                {planDescription(snapshot.plan.code, snapshot.plan.description)}
               </p>
             )}
           </div>
@@ -122,9 +143,14 @@ export default function PlanPage() {
       </div>
 
       {/* Plan cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {plans.map((p) => {
+      <div className={cn(
+        "grid gap-4",
+        visiblePlans.length >= 4 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3",
+      )}>
+        {visiblePlans.map((p) => {
           const isCurrent = p.code === currentCode;
+          const isBeta = p.code === "beta";
+          const isPopular = p.code === "pro";
           const feats = planFeatures[p.id] ?? [];
           const featMap = new Map(feats.map((f) => [f.feature?.key, f]));
           return (
@@ -133,21 +159,35 @@ export default function PlanPage() {
               className={cn(
                 "surface p-5 flex flex-col",
                 isCurrent && "ring-2 ring-primary",
+                isPopular && !isCurrent && "border-primary/40",
               )}
             >
-              <div className="flex items-center justify-between">
-                <div className="font-serif text-xl">{p.name}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-serif text-xl">
+                  {planName(p.code, p.name)}
+                </div>
                 {isCurrent ? (
                   <Badge>{t("billing.cards.current")}</Badge>
-                ) : p.code === "pro" ? (
+                ) : isBeta ? (
+                  <Badge variant="secondary" className="gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    {t("billing.cards.inviteOnly")}
+                  </Badge>
+                ) : isPopular ? (
                   <Badge variant="secondary" className="gap-1">
                     <Sparkles className="h-3 w-3" />{t("billing.cards.popular")}
                   </Badge>
                 ) : null}
               </div>
-              {p.description && (
-                <p className="text-sm text-muted-foreground mt-1 min-h-[40px]">{p.description}</p>
+
+              {planSubtitle(p.code) && (
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mt-2">
+                  {planSubtitle(p.code)}
+                </p>
               )}
+              <p className="text-sm text-muted-foreground mt-1 min-h-[40px]">
+                {planDescription(p.code, p.description)}
+              </p>
 
               <ul className="mt-4 space-y-2 text-sm flex-1">
                 {HIGHLIGHTED_FEATURES.map((fk) => {
@@ -182,9 +222,19 @@ export default function PlanPage() {
                   <Button disabled variant="outline" className="w-full">
                     {t("billing.cards.current")}
                   </Button>
-                ) : (
-                  <Button disabled className="w-full" variant={p.code === "free" ? "outline" : "default"}>
+                ) : isBeta ? (
+                  <Button disabled variant="outline" className="w-full gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    {t("billing.cards.inviteOnly")}
+                  </Button>
+                ) : p.code === "free" ? (
+                  <Button disabled variant="outline" className="w-full">
                     {t("billing.cards.comingSoon")}
+                  </Button>
+                ) : (
+                  <Button disabled className="w-full gap-2">
+                    <Mail className="h-4 w-4" />
+                    {t("billing.cards.contactUs")}
                   </Button>
                 )}
               </div>
