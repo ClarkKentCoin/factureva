@@ -46,7 +46,7 @@ export default function WorkspacesPage() {
     setBusy(true);
     const { data: tid, error } = await supabase.rpc("create_initial_tenant", { _name: newName.trim() });
     setBusy(false);
-    if (error || !tid) return toast.error(error?.message ?? t("common.errorGeneric"));
+    if (error || !tid) return toast.error(error?.message ?? "Error");
     setCurrentTenantId(tid as string);
     setNewName("");
     setShowCreate(false);
