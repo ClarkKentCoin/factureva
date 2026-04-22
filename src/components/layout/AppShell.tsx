@@ -2,20 +2,21 @@ import { ReactNode, useState } from "react";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FileText, FileSignature, Users, Building2, Package,
-  Briefcase, Settings, LogOut, Menu, X, ShieldCheck, Globe,
+  Briefcase, Settings, LogOut, Menu, X, ShieldCheck, Globe, Plus, ChevronsUpDown, Check,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth-context";
 import { setInterfaceLanguage } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
-  const { signOut, isSuperAdmin, memberships, currentTenantId, setCurrentTenantId, user } = useAuth();
+  const { signOut, isSuperAdmin, activeMemberships, currentTenantId, setCurrentTenantId, user } = useAuth();
+  const memberships = activeMemberships;
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -54,14 +55,25 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <div className="text-sm font-medium truncate">{current?.tenant.name ?? "—"}</div>
                   <div className="text-[11px] text-muted-foreground capitalize">{current?.role}</div>
                 </div>
+                <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-60">
               {memberships.map((m) => (
                 <DropdownMenuItem key={m.tenant_id} onClick={() => setCurrentTenantId(m.tenant_id)}>
-                  <span className="truncate">{m.tenant.name}</span>
+                  <span className="truncate flex-1">{m.tenant.name}</span>
+                  {m.tenant_id === currentTenantId && <Check className="h-4 w-4 ml-2" />}
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => { setOpen(false); navigate("/app/workspaces"); }}>
+                <Settings className="h-4 w-4 mr-2" />
+                {t("workspaces.manage")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { setOpen(false); navigate("/app/workspaces?new=1"); }}>
+                <Plus className="h-4 w-4 mr-2" />
+                {t("workspaces.create")}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

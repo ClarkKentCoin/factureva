@@ -15,6 +15,7 @@ import SignUp from "./pages/auth/SignUp";
 import Onboarding from "./pages/onboarding/Onboarding";
 import Dashboard from "./pages/app/Dashboard";
 import { SettingsPage } from "./pages/app/Placeholders";
+import WorkspacesPage from "./pages/app/Workspaces";
 import InvoicesPage from "./pages/app/Invoices";
 import InvoiceEditorPage from "./pages/app/InvoiceEditor";
 import DevisPage from "./pages/app/Devis";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/app/items" element={<RequireTenant><AppShell><ItemsPage /></AppShell></RequireTenant>} />
             <Route path="/app/activities" element={<RequireTenant><AppShell><ActivitiesPage /></AppShell></RequireTenant>} />
             <Route path="/app/company" element={<RequireTenant><AppShell><CompanyPage /></AppShell></RequireTenant>} />
+            <Route path="/app/workspaces" element={<RequireTenant><AppShell><WorkspacesPage /></AppShell></RequireTenant>} />
             <Route path="/app/settings" element={<RequireTenant><AppShell><SettingsPage /></AppShell></RequireTenant>} />
 
             {/* Superadmin */}
