@@ -285,7 +285,7 @@ export default function CompanyPage() {
           </div>
         </section>
 
-
+        <Section title={t("company.sections.identity")} description={t("company.sections.identityDesc")}>
           <Field id="company_name" label={t("company.fields.company_name")} required error={errMsg("company_name")} full>
             <Input id="company_name" value={values.company_name}
               onChange={(e) => set("company_name", e.target.value)} />
