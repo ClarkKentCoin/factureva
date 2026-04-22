@@ -86,6 +86,9 @@ export default function DevisEditorPage() {
   const [downloading, setDownloading] = useState(false);
   const [lastSentAt, setLastSentAt] = useState<string | null>(null);
   const [lastSentTo, setLastSentTo] = useState<string | null>(null);
+  const [clientSignatureUrl, setClientSignatureUrl] = useState<string | null>(null);
+  const [uploadingClientSig, setUploadingClientSig] = useState(false);
+  const clientSigInputRef = useRef<HTMLInputElement | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const offscreenRef = useRef<HTMLDivElement | null>(null);
 
@@ -134,6 +137,7 @@ export default function DevisEditorPage() {
           })) : [newEmptyLine(0)]);
           setLastSentAt((inv as { last_sent_at?: string | null }).last_sent_at ?? null);
           setLastSentTo((inv as { last_sent_to?: string | null }).last_sent_to ?? null);
+          setClientSignatureUrl((inv as { client_signature_url?: string | null }).client_signature_url ?? null);
           if (inv.status !== "draft") {
             setSnapshotSeller((inv.seller_snapshot ?? null) as PreviewCompany | null);
             setSnapshotClient((inv.client_snapshot ?? null) as PreviewClient | null);
@@ -163,6 +167,7 @@ export default function DevisEditorPage() {
 
   const previewCompany: PreviewCompany | null = readonly ? snapshotSeller : (company ? {
     logo_url: company.logo_url,
+    signature_url: (company as any).signature_url ?? null,
     company_name: company.company_name,
     legal_name: company.legal_name,
     address_line1: company.address_line1, address_line2: company.address_line2,
