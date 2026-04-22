@@ -243,8 +243,27 @@ export default function InvoicePreview({
           </section>
         )}
 
-        {/* Payment (invoices only — not relevant for quotes) */}
-        {!isDevis && (company?.payment_defaults?.iban || company?.payment_defaults?.payment_instructions) && (
+        {/* Credit-note specific: correction reason + legal wording */}
+        {isCreditNote && (
+          <>
+            {correctionReason && (
+              <section className="pt-4 border-t border-border mt-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                  {t("creditNotes.preview.correctionReason")}
+                </div>
+                <div className="whitespace-pre-line text-xs">{correctionReason}</div>
+              </section>
+            )}
+            <section className="pt-4 border-t border-border mt-4">
+              <div className="text-[11px] text-muted-foreground italic">
+                {t("creditNotes.preview.legalNotice")}
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* Payment (invoices only — not relevant for quotes or credit notes) */}
+        {!isDevis && !isCreditNote && (company?.payment_defaults?.iban || company?.payment_defaults?.payment_instructions) && (
           <section className="pt-4 border-t border-border mt-4">
             <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
               {t("invoices.preview.paymentTitle")}
