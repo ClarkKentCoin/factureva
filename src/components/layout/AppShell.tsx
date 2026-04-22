@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, FileSignature, Users, Building2, Package,
+  LayoutDashboard, FileText, FileSignature, FileMinus, Users, Building2, Package,
   Briefcase, Settings, LogOut, Menu, X, ShieldCheck, Globe, Plus, ChevronsUpDown, Check, Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/app", label: t("nav.dashboard"), icon: LayoutDashboard, end: true },
     { to: "/app/invoices", label: t("nav.invoices"), icon: FileText },
     { to: "/app/devis", label: t("nav.devis"), icon: FileSignature },
+    { to: "/app/credit-notes", label: t("nav.creditNotes"), icon: FileMinus },
     { to: "/app/clients", label: t("nav.clients"), icon: Users },
     { to: "/app/items", label: t("nav.items"), icon: Package },
     { to: "/app/activities", label: t("nav.activities"), icon: Briefcase },
