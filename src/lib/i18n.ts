@@ -860,6 +860,8 @@ const resources = {
           documentTitle: "Quote",
           validUntil: "Valid until",
           acceptanceNote: "Approved for agreement — client date and signature.",
+          companySignature: "Company signature",
+          clientSignature: "Client signature",
         },
         actions: {
           issue: "Issue quote",
@@ -902,10 +904,6 @@ const resources = {
           remove: "Remove",
           toasts: { uploaded: "Client signature saved.", removed: "Client signature removed." },
           errors: { type: "Unsupported format (PNG, JPG, SVG, WEBP).", size: "File too large (max 2 MB).", upload: "Failed to upload signature." },
-        },
-        preview: {
-          companySignature: "Company signature",
-          clientSignature: "Client signature",
         },
       },
     },
