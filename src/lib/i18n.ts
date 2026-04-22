@@ -779,6 +779,7 @@ const resources = {
         settings: "Settings", signOut: "Sign out", superadmin: "Superadmin", plan: "Plan",
         team: "Team",
         creditNotes: "Credit Notes",
+      },
       landing: {
         heroSubtitle: "Invoices, quotes, clients, payments. Built for France — designed for international.",
       },
