@@ -1435,7 +1435,7 @@ const resources = {
       nav: {
         dashboard: "Дашборд", invoices: "Счета", devis: "Сметы", clients: "Клиенты",
         company: "Компания", items: "Каталог", activities: "Виды деятельности",
-        settings: "Настройки", signOut: "Выйти", superadmin: "Суперадмин", plan: "Тариф",
+        settings: "Настройки", signOut: "Выйти", superadmin: "Суперадмин", plan: "Тариф", team: "Команда",
       },
       landing: {
         heroSubtitle: "Счета, сметы, клиенты, платежи. Создано для Франции — с прицелом на мир.",
