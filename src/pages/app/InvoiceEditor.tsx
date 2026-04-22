@@ -140,6 +140,14 @@ export default function InvoiceEditorPage() {
             if (snap.legal_mentions) setLegalMentions(snap.legal_mentions);
             try { setPayments(await listPayments(inv.id)); } catch { /* noop */ }
           }
+          // Load linked credit notes (for any invoice document, regardless of status)
+          try {
+            const credits = await listCreditsForInvoice(inv.id);
+            if (alive) {
+              setLinkedCredits(credits);
+              setCreditedAmount(await sumIssuedCreditsForInvoice(inv.id));
+            }
+          } catch { /* noop */ }
         }
       } catch { toast.error(t("common.loadError")); }
       finally { if (alive) setLoading(false); }
