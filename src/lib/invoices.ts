@@ -56,7 +56,7 @@ export const newEmptyLine = (sort_order: number): EditorLine => ({
 export async function listInvoices(tenantId: string) {
   const { data, error } = await supabase
     .from("invoices")
-    .select("*, client:clients(display_name)")
+    .select("*, client:clients(id, display_name, email, phone)")
     .eq("tenant_id", tenantId)
     .eq("document_type", "invoice")
     .order("created_at", { ascending: false });
@@ -67,7 +67,7 @@ export async function listInvoices(tenantId: string) {
 export async function listDevis(tenantId: string) {
   const { data, error } = await supabase
     .from("invoices")
-    .select("*, client:clients(display_name)")
+    .select("*, client:clients(id, display_name, email, phone)")
     .eq("tenant_id", tenantId)
     .eq("document_type", "devis")
     .order("created_at", { ascending: false });
