@@ -265,6 +265,50 @@ export default function DevisEditorPage() {
     } catch { toast.error(t("common.saveError")); }
   };
 
+  const onClientSigUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !currentTenantId || !invoice.id) return;
+    if (!/^image\/(png|jpe?g|svg\+xml|webp)$/i.test(file.type)) {
+      toast.error(t("devis.signature.errors.type")); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("devis.signature.errors.size")); return;
+    }
+    setUploadingClientSig(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${currentTenantId}/client-sig-${invoice.id}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("signatures").upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("signatures").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: updErr } = await supabase
+        .from("invoices")
+        .update({ client_signature_url: url } as any)
+        .eq("id", invoice.id);
+      if (updErr) throw updErr;
+      setClientSignatureUrl(url);
+      toast.success(t("devis.signature.toasts.uploaded"));
+    } catch (err: any) {
+      toast.error(err?.message || t("devis.signature.errors.upload"));
+    } finally { setUploadingClientSig(false); }
+  };
+
+  const onClientSigRemove = async () => {
+    if (!invoice.id) return;
+    try {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ client_signature_url: null } as any)
+        .eq("id", invoice.id);
+      if (error) throw error;
+      setClientSignatureUrl(null);
+      toast.success(t("devis.signature.toasts.removed"));
+    } catch { toast.error(t("common.saveError")); }
+  };
+
   const pdfFilename = () => {
     const base = number ?? `devis-draft-${invoice.id ?? "new"}`;
     return `${base}.pdf`.replace(/[^a-zA-Z0-9._-]/g, "_");
