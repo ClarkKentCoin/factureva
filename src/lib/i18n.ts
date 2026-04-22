@@ -625,6 +625,10 @@ const resources = {
             title: "Les devis sont une fonctionnalité premium",
             description: "La création de nouveaux devis est incluse dans les formules payantes. Les devis existants restent accessibles.",
           },
+          creditNotes: {
+            title: "Les avoirs sont une fonctionnalité premium",
+            description: "La création de nouveaux avoirs est incluse dans les formules payantes. Les avoirs existants restent accessibles.",
+          },
         },
         plans: {
           free: {
@@ -1304,6 +1308,10 @@ const resources = {
             title: "Quotes are a premium feature",
             description: "Creating new quotes (devis) is included in paid plans. Existing quotes remain accessible.",
           },
+          creditNotes: {
+            title: "Credit notes are a premium feature",
+            description: "Creating new credit notes is included in paid plans. Existing credit notes remain accessible.",
+          },
         },
         plans: {
           free: {
@@ -1966,6 +1974,10 @@ const resources = {
           devis: {
             title: "Devis — премиум-функция",
             description: "Создание коммерческих предложений входит в платные тарифы. Существующие devis остаются доступны.",
+          },
+          creditNotes: {
+            title: "Кредит-ноты — премиум-функция",
+            description: "Создание новых кредит-нот входит в платные тарифы. Существующие кредит-ноты остаются доступны.",
           },
         },
         plans: {
