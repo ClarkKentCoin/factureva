@@ -395,6 +395,11 @@ export default function InvoiceEditorPage() {
                 <Copy className="h-4 w-4" />{t("invoices.duplicate")}
               </Button>
             )}
+            {canShowCreateCredit && remainingCreditable > 0 && (
+              <Button variant="outline" onClick={() => onCreateCreditNote("full")} className="gap-1">
+                <FileMinus className="h-4 w-4" />{t("creditNotes.actions.createFromInvoice")}
+              </Button>
+            )}
           </div>
         }
       />
@@ -431,9 +436,13 @@ export default function InvoiceEditorPage() {
             <h2 className="font-serif text-lg flex items-center gap-2">
               <Wallet className="h-4 w-4" />{t("invoices.payments.sectionTitle")}
             </h2>
-            <div className="text-sm text-muted-foreground">
-              <span className="mr-3">{t("invoices.payments.paidLabel")}: <span className="font-mono text-foreground">{formatMoney(paidAmount, invoice.currency_code, locale)}</span></span>
-              <span>{t("invoices.payments.dueLabel")}: <span className="font-mono text-foreground">{formatMoney(due, invoice.currency_code, locale)}</span></span>
+            <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
+              <span>{t("invoices.totals.totalTTC")}: <span className="font-mono text-foreground">{formatMoney(totals.total_ttc, invoice.currency_code, locale)}</span></span>
+              <span>{t("invoices.payments.paidLabel")}: <span className="font-mono text-foreground">{formatMoney(paidAmount, invoice.currency_code, locale)}</span></span>
+              {creditedAmount > 0 && (
+                <span>{t("creditNotes.fields.creditedAmount")}: <span className="font-mono text-foreground">{formatMoney(creditedAmount, invoice.currency_code, locale)}</span></span>
+              )}
+              <span>{t("creditNotes.fields.remainingDueAfterCredit")}: <span className="font-mono text-foreground">{formatMoney(due, invoice.currency_code, locale)}</span></span>
             </div>
           </div>
           {payments.length === 0 ? (
