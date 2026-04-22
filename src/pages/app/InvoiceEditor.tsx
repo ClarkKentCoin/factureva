@@ -81,8 +81,14 @@ export default function InvoiceEditorPage() {
   const [paidAmount, setPaidAmount] = useState(0);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [linkedCredits, setLinkedCredits] = useState<any[]>([]);
+  const [creditedAmount, setCreditedAmount] = useState(0);
+  const [creditGateOpen, setCreditGateOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const offscreenRef = useRef<HTMLDivElement | null>(null);
+
+  const { hasFeature: hasEnt } = useEntitlements();
+  const canCreateCredit = hasEnt("credit_notes.create");
 
   useEffect(() => {
     if (!currentTenantId) return;
