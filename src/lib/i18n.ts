@@ -776,6 +776,7 @@ const resources = {
         dashboard: "Dashboard", invoices: "Invoices", devis: "Quotes", clients: "Clients",
         company: "Company", items: "Catalog", activities: "Activities",
         settings: "Settings", signOut: "Sign out", superadmin: "Superadmin", plan: "Plan",
+        team: "Team",
       },
       landing: {
         heroSubtitle: "Invoices, quotes, clients, payments. Built for France — designed for international.",
