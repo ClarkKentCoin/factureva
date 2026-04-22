@@ -28,6 +28,7 @@ import ActivitiesPage from "./pages/app/Activities";
 import PlanPage from "./pages/app/Plan";
 import SuperAdminOverview from "./pages/superadmin/Overview";
 import SuperAdminTenants from "./pages/superadmin/Tenants";
+import SuperAdminTenantDetail from "./pages/superadmin/TenantDetail";
 import SuperAdminPlans from "./pages/superadmin/Plans";
 import SuperAdminAudit from "./pages/superadmin/Audit";
 import NotFound from "./pages/NotFound.tsx";
@@ -74,6 +75,7 @@ const App = () => (
             {/* Superadmin */}
             <Route path="/superadmin" element={<RequireSuperAdmin><SuperAdminShell><SuperAdminOverview /></SuperAdminShell></RequireSuperAdmin>} />
             <Route path="/superadmin/tenants" element={<RequireSuperAdmin><SuperAdminShell><SuperAdminTenants /></SuperAdminShell></RequireSuperAdmin>} />
+            <Route path="/superadmin/tenants/:tenantId" element={<RequireSuperAdmin><SuperAdminShell><SuperAdminTenantDetail /></SuperAdminShell></RequireSuperAdmin>} />
             <Route path="/superadmin/plans" element={<RequireSuperAdmin><SuperAdminShell><SuperAdminPlans /></SuperAdminShell></RequireSuperAdmin>} />
             <Route path="/superadmin/audit" element={<RequireSuperAdmin><SuperAdminShell><SuperAdminAudit /></SuperAdminShell></RequireSuperAdmin>} />
 
