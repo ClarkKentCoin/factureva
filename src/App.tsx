@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { AuthProvider } from "@/lib/auth-context";
+import { EntitlementsProvider } from "@/hooks/use-entitlements";
 import { RequireAuth, RequireSuperAdmin, RequireTenant, GuestOnly } from "@/lib/route-guards";
 import { AppShell } from "@/components/layout/AppShell";
 import { SuperAdminShell } from "@/components/layout/SuperAdminShell";
@@ -24,6 +25,7 @@ import CompanyPage from "./pages/app/Company";
 import ClientsPage from "./pages/app/Clients";
 import ItemsPage from "./pages/app/Items";
 import ActivitiesPage from "./pages/app/Activities";
+import PlanPage from "./pages/app/Plan";
 import SuperAdminOverview from "./pages/superadmin/Overview";
 import SuperAdminTenants from "./pages/superadmin/Tenants";
 import SuperAdminPlans from "./pages/superadmin/Plans";
@@ -39,6 +41,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <EntitlementsProvider>
           <Routes>
             {/* Public */}
             <Route path="/" element={<Landing />} />
@@ -65,6 +68,8 @@ const App = () => (
             <Route path="/app/company" element={<RequireTenant><AppShell><CompanyPage /></AppShell></RequireTenant>} />
             <Route path="/app/workspaces" element={<RequireTenant><AppShell><WorkspacesPage /></AppShell></RequireTenant>} />
             <Route path="/app/settings" element={<RequireTenant><AppShell><SettingsPage /></AppShell></RequireTenant>} />
+            <Route path="/app/settings/plan" element={<RequireTenant><AppShell><PlanPage /></AppShell></RequireTenant>} />
+            <Route path="/app/billing" element={<Navigate to="/app/settings/plan" replace />} />
 
             {/* Superadmin */}
             <Route path="/superadmin" element={<RequireSuperAdmin><SuperAdminShell><SuperAdminOverview /></SuperAdminShell></RequireSuperAdmin>} />
@@ -77,6 +82,7 @@ const App = () => (
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </EntitlementsProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
