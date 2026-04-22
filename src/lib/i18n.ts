@@ -20,6 +20,7 @@ const resources = {
         superadmin: "Superadmin",
         plan: "Abonnement",
         team: "Équipe",
+        creditNotes: "Avoirs",
       },
       landing: {
         heroSubtitle: "Factures, devis, clients, paiements. Conçu pour la France — pensé pour l'international.",
@@ -777,7 +778,7 @@ const resources = {
         company: "Company", items: "Catalog", activities: "Activities",
         settings: "Settings", signOut: "Sign out", superadmin: "Superadmin", plan: "Plan",
         team: "Team",
-      },
+        creditNotes: "Credit Notes",
       landing: {
         heroSubtitle: "Invoices, quotes, clients, payments. Built for France — designed for international.",
       },
@@ -1436,7 +1437,7 @@ const resources = {
         dashboard: "Дашборд", invoices: "Счета", devis: "Сметы", clients: "Клиенты",
         company: "Компания", items: "Каталог", activities: "Виды деятельности",
         settings: "Настройки", signOut: "Выйти", superadmin: "Суперадмин", plan: "Тариф", team: "Команда",
-      },
+        creditNotes: "Кредит-ноты",
       landing: {
         heroSubtitle: "Счета, сметы, клиенты, платежи. Создано для Франции — с прицелом на мир.",
       },
