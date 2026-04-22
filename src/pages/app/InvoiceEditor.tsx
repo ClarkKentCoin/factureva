@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy, Download, Mail, Wallet, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Pencil, Copy, Download, Mail, Wallet, AlertTriangle, FileMinus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
@@ -26,6 +26,9 @@ import SendInvoiceEmailDialog from "@/components/invoices/SendInvoiceEmailDialog
 import RecordPaymentDialog from "@/components/invoices/RecordPaymentDialog";
 import { renderInvoicePdf, downloadBlob } from "@/lib/invoice-pdf";
 import { listPayments, computeVisibleStatus, balanceDue, deletePayment, type PaymentRow } from "@/lib/payments";
+import { listCreditsForInvoice, sumIssuedCreditsForInvoice } from "@/lib/credit-notes";
+import { useEntitlements } from "@/hooks/use-entitlements";
+import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
 
 type ClientLite = { id: string; display_name: string };
 type ItemLite = {
@@ -78,8 +81,14 @@ export default function InvoiceEditorPage() {
   const [paidAmount, setPaidAmount] = useState(0);
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [linkedCredits, setLinkedCredits] = useState<any[]>([]);
+  const [creditedAmount, setCreditedAmount] = useState(0);
+  const [creditGateOpen, setCreditGateOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const offscreenRef = useRef<HTMLDivElement | null>(null);
+
+  const { hasFeature: hasEnt } = useEntitlements();
+  const canCreateCredit = hasEnt("credit_notes.create");
 
   useEffect(() => {
     if (!currentTenantId) return;
@@ -131,6 +140,14 @@ export default function InvoiceEditorPage() {
             if (snap.legal_mentions) setLegalMentions(snap.legal_mentions);
             try { setPayments(await listPayments(inv.id)); } catch { /* noop */ }
           }
+          // Load linked credit notes (for any invoice document, regardless of status)
+          try {
+            const credits = await listCreditsForInvoice(inv.id);
+            if (alive) {
+              setLinkedCredits(credits);
+              setCreditedAmount(await sumIssuedCreditsForInvoice(inv.id));
+            }
+          } catch { /* noop */ }
         }
       } catch { toast.error(t("common.loadError")); }
       finally { if (alive) setLoading(false); }
@@ -154,9 +171,17 @@ export default function InvoiceEditorPage() {
 
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
   const readonly = status !== "draft";
-  const visibleStatus = computeVisibleStatus(status, invoice.due_date, paidAmount, totals.total_ttc);
-  const due = balanceDue(totals.total_ttc, paidAmount);
+  const visibleStatus = computeVisibleStatus(status, invoice.due_date, paidAmount, totals.total_ttc, creditedAmount);
+  const due = balanceDue(totals.total_ttc, paidAmount, creditedAmount);
   const canRecordPayment = (status === "issued" || status === "paid") && !!invoice.id;
+  const canShowCreateCredit = status === "issued" || status === "paid" || status === "overdue";
+  const remainingCreditable = Math.max(0, totals.total_ttc - creditedAmount);
+
+  const onCreateCreditNote = (mode: "full" | "partial") => {
+    if (!invoice.id) return;
+    if (!canCreateCredit) { setCreditGateOpen(true); return; }
+    navigate(`/app/credit-notes/new?invoice=${invoice.id}&mode=${mode}`);
+  };
 
   const refreshPayments = async () => {
     if (!invoice.id) return;
@@ -370,6 +395,11 @@ export default function InvoiceEditorPage() {
                 <Copy className="h-4 w-4" />{t("invoices.duplicate")}
               </Button>
             )}
+            {canShowCreateCredit && remainingCreditable > 0 && (
+              <Button variant="outline" onClick={() => onCreateCreditNote("full")} className="gap-1">
+                <FileMinus className="h-4 w-4" />{t("creditNotes.actions.createFromInvoice")}
+              </Button>
+            )}
           </div>
         }
       />
@@ -406,9 +436,13 @@ export default function InvoiceEditorPage() {
             <h2 className="font-serif text-lg flex items-center gap-2">
               <Wallet className="h-4 w-4" />{t("invoices.payments.sectionTitle")}
             </h2>
-            <div className="text-sm text-muted-foreground">
-              <span className="mr-3">{t("invoices.payments.paidLabel")}: <span className="font-mono text-foreground">{formatMoney(paidAmount, invoice.currency_code, locale)}</span></span>
-              <span>{t("invoices.payments.dueLabel")}: <span className="font-mono text-foreground">{formatMoney(due, invoice.currency_code, locale)}</span></span>
+            <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
+              <span>{t("invoices.totals.totalTTC")}: <span className="font-mono text-foreground">{formatMoney(totals.total_ttc, invoice.currency_code, locale)}</span></span>
+              <span>{t("invoices.payments.paidLabel")}: <span className="font-mono text-foreground">{formatMoney(paidAmount, invoice.currency_code, locale)}</span></span>
+              {creditedAmount > 0 && (
+                <span>{t("creditNotes.fields.creditedAmount")}: <span className="font-mono text-foreground">{formatMoney(creditedAmount, invoice.currency_code, locale)}</span></span>
+              )}
+              <span>{t("creditNotes.fields.remainingDueAfterCredit")}: <span className="font-mono text-foreground">{formatMoney(due, invoice.currency_code, locale)}</span></span>
             </div>
           </div>
           {payments.length === 0 ? (
@@ -433,6 +467,43 @@ export default function InvoiceEditorPage() {
           )}
         </div>
       )}
+
+      {linkedCredits.length > 0 && (
+        <div className="surface p-5 mb-4">
+          <h2 className="font-serif text-lg flex items-center gap-2 mb-3">
+            <FileMinus className="h-4 w-4" />{t("creditNotes.linkedTitle")}
+          </h2>
+          <ul className="divide-y divide-border text-sm">
+            {linkedCredits.map((c: any) => (
+              <li key={c.id} className="py-2 flex items-center justify-between gap-2 flex-wrap">
+                <div className="min-w-0">
+                  <Link to={`/app/credit-notes/${c.id}`} className="font-mono hover:underline">
+                    {c.invoice_number ?? t("creditNotes.draftLabel")}
+                  </Link>
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {t(`creditNotes.status.${c.status}`, { defaultValue: c.status })}
+                    {c.issue_date && <> · {new Date(c.issue_date).toLocaleDateString(locale)}</>}
+                  </span>
+                </div>
+                <div className="font-mono">{formatMoney(Number(c.total_ttc), c.currency_code, locale)}</div>
+              </li>
+            ))}
+          </ul>
+          {canShowCreateCredit && remainingCreditable > 0 && (
+            <div className="mt-3 flex gap-2 flex-wrap">
+              <Button size="sm" variant="outline" onClick={() => onCreateCreditNote("partial")} className="gap-1">
+                <Plus className="h-4 w-4" />{t("creditNotes.actions.createPartial")}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <UpgradeDialog
+        open={creditGateOpen}
+        onOpenChange={setCreditGateOpen}
+        featureKeyPrefix="billing.gates.creditNotes"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* LEFT: structured editor (or read-only summary) */}
