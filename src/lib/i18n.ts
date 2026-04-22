@@ -1270,6 +1270,8 @@ const resources = {
           documentTitle: "Смета",
           validUntil: "Действительна до",
           acceptanceNote: "Согласовано — дата и подпись клиента.",
+          companySignature: "Подпись компании",
+          clientSignature: "Подпись клиента",
         },
         actions: {
           issue: "Выпустить смету",
@@ -1312,10 +1314,6 @@ const resources = {
           remove: "Удалить",
           toasts: { uploaded: "Подпись клиента сохранена.", removed: "Подпись клиента удалена." },
           errors: { type: "Неподдерживаемый формат (PNG, JPG, SVG, WEBP).", size: "Файл слишком большой (макс. 2 МБ).", upload: "Не удалось загрузить подпись." },
-        },
-        preview: {
-          companySignature: "Подпись компании",
-          clientSignature: "Подпись клиента",
         },
       },
     },
