@@ -544,12 +544,43 @@ const resources = {
         currentPlan: "Formule actuelle",
         noPlan: "Aucune formule assignée",
         contactNote: "Le paiement en ligne arrive bientôt. Contactez-nous pour mettre à niveau dès aujourd'hui.",
-        cards: { current: "Actuelle", popular: "Populaire", comingSoon: "Bientôt" },
+        cards: {
+          current: "Formule actuelle",
+          popular: "Le plus populaire",
+          comingSoon: "Bientôt disponible",
+          contactUs: "Nous contacter",
+          inviteOnly: "Sur invitation",
+          betaBadge: "Bêta",
+          included: "Inclus",
+          notIncluded: "Non inclus",
+        },
         upgrade: { cta: "Passer à une formule supérieure", later: "Plus tard" },
         gates: {
           devis: {
             title: "Les devis sont une fonctionnalité premium",
             description: "La création de nouveaux devis est incluse dans les formules payantes. Les devis existants restent accessibles.",
+          },
+        },
+        plans: {
+          free: {
+            name: "Free",
+            subtitle: "Pour démarrer la facturation en règle",
+            description: "Tout l'essentiel pour facturer légalement vos premiers clients, sans frais.",
+          },
+          pro: {
+            name: "Pro",
+            subtitle: "Pour les indépendants et petites équipes",
+            description: "Devis, relances, branding et volume confortable pour gérer votre activité au quotidien.",
+          },
+          business: {
+            name: "Business",
+            subtitle: "Pour les structures établies",
+            description: "Multi-entités, rapports avancés, accès API et larges limites pour les équipes en croissance.",
+          },
+          beta: {
+            name: "Bêta",
+            subtitle: "Accès test sur invitation",
+            description: "Plan interne réservé aux comptes bêta. Accès à toutes les fonctionnalités Pro et Business pendant la phase de test.",
           },
         },
         features: {
@@ -1047,13 +1078,44 @@ const resources = {
         description: "Manage your plan and see what your workspace is entitled to.",
         currentPlan: "Current plan",
         noPlan: "No plan assigned",
-        contactNote: "Online checkout coming soon. Contact us to upgrade in the meantime.",
-        cards: { current: "Current", popular: "Popular", comingSoon: "Coming soon" },
+        contactNote: "Online checkout is coming soon. Contact us to upgrade in the meantime.",
+        cards: {
+          current: "Current plan",
+          popular: "Most popular",
+          comingSoon: "Coming soon",
+          contactUs: "Contact us",
+          inviteOnly: "Invite only",
+          betaBadge: "Beta",
+          included: "Included",
+          notIncluded: "Not included",
+        },
         upgrade: { cta: "Upgrade plan", later: "Maybe later" },
         gates: {
           devis: {
             title: "Quotes are a premium feature",
             description: "Creating new quotes (devis) is included in paid plans. Existing quotes remain accessible.",
+          },
+        },
+        plans: {
+          free: {
+            name: "Free",
+            subtitle: "Get started with compliant invoicing",
+            description: "Everything you need to invoice your first clients legally, at no cost.",
+          },
+          pro: {
+            name: "Pro",
+            subtitle: "For freelancers and small teams",
+            description: "Quotes, reminders, custom branding and comfortable volume to run your business day to day.",
+          },
+          business: {
+            name: "Business",
+            subtitle: "For established organizations",
+            description: "Multiple legal entities, advanced reports, API access and large limits for growing teams.",
+          },
+          beta: {
+            name: "Beta",
+            subtitle: "Invite-only testing access",
+            description: "Internal plan reserved for beta accounts. Includes all Pro and Business capabilities during the testing phase.",
           },
         },
         features: {
@@ -1548,17 +1610,48 @@ const resources = {
         },
       },
       billing: {
-        title: "Abonnement",
+        title: "Подписка",
         description: "Управляйте своим тарифом и узнайте, что доступно вашему рабочему пространству.",
         currentPlan: "Текущий тариф",
         noPlan: "Тариф не назначен",
         contactNote: "Онлайн-оплата скоро появится. Свяжитесь с нами для перехода на платный тариф.",
-        cards: { current: "Текущий", popular: "Популярный", comingSoon: "Скоро" },
+        cards: {
+          current: "Текущий тариф",
+          popular: "Самый популярный",
+          comingSoon: "Скоро",
+          contactUs: "Связаться с нами",
+          inviteOnly: "По приглашению",
+          betaBadge: "Бета",
+          included: "Входит",
+          notIncluded: "Не входит",
+        },
         upgrade: { cta: "Перейти на платный тариф", later: "Позже" },
         gates: {
           devis: {
             title: "Devis — премиум-функция",
             description: "Создание коммерческих предложений входит в платные тарифы. Существующие devis остаются доступны.",
+          },
+        },
+        plans: {
+          free: {
+            name: "Free",
+            subtitle: "Начните выставлять счета по правилам",
+            description: "Всё необходимое, чтобы законно выставить счёт первым клиентам — бесплатно.",
+          },
+          pro: {
+            name: "Pro",
+            subtitle: "Для фрилансеров и небольших команд",
+            description: "Коммерческие предложения, напоминания, фирменный стиль и комфортные лимиты для повседневной работы.",
+          },
+          business: {
+            name: "Business",
+            subtitle: "Для растущих компаний",
+            description: "Несколько юр. лиц, расширенные отчёты, доступ к API и большие лимиты для команд.",
+          },
+          beta: {
+            name: "Бета",
+            subtitle: "Тестовый доступ по приглашению",
+            description: "Внутренний тариф для бета-аккаунтов. Включает все возможности Pro и Business на время тестирования.",
           },
         },
         features: {
