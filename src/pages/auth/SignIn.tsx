@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 export default function SignIn() {
   const { t } = useTranslation();
   const nav = useNavigate();
+  const [params] = useSearchParams();
+  const next = params.get("next");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,6 +23,7 @@ export default function SignIn() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
+    if (next && next.startsWith("/")) return nav(next, { replace: true });
     // GuestOnly + PostLoginRedirect on `/` will route correctly:
     // super_admin → /superadmin, tenant user → /app, no tenant → /onboarding.
     nav("/post-login", { replace: true });
