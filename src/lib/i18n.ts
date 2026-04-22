@@ -19,6 +19,7 @@ const resources = {
         signOut: "Se déconnecter",
         superadmin: "Superadmin",
         plan: "Abonnement",
+        team: "Équipe",
       },
       landing: {
         heroSubtitle: "Factures, devis, clients, paiements. Conçu pour la France — pensé pour l'international.",
