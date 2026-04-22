@@ -209,9 +209,12 @@ export default function SuperAdminTenantDetail() {
               const enabled = !!snap?.features[f.key];
               const ov = overrideMap.get(f.id);
               return (
-                <li key={f.id} className="flex items-center justify-between gap-2">
-                  <span className="truncate"><span className="font-medium">{f.name}</span> <code className="text-xs text-muted-foreground">{f.key}</code></span>
-                  <span className="flex items-center gap-2">
+                <li key={f.id} className="flex items-start justify-between gap-2 flex-wrap">
+                  <span className="min-w-0 break-words">
+                    <span className="font-medium">{f.name}</span>{" "}
+                    <code className="text-xs text-muted-foreground break-all">{f.key}</code>
+                  </span>
+                  <span className="flex items-center gap-2 shrink-0">
                     {ov && <Badge variant="secondary" className="text-[10px]">override</Badge>}
                     <Badge variant={enabled ? "default" : "outline"}>
                       {enabled ? t("superadmin.detail.overrideEnabled") : t("superadmin.detail.overrideDisabled")}
@@ -230,11 +233,14 @@ export default function SuperAdminTenantDetail() {
               const v = snap?.limits[f.key];
               const ov = overrideMap.get(f.id);
               return (
-                <li key={f.id} className="flex items-center justify-between gap-2">
-                  <span className="truncate"><span className="font-medium">{f.name}</span> <code className="text-xs text-muted-foreground">{f.key}</code></span>
-                  <span className="flex items-center gap-2">
+                <li key={f.id} className="flex items-start justify-between gap-2 flex-wrap">
+                  <span className="min-w-0 break-words">
+                    <span className="font-medium">{f.name}</span>{" "}
+                    <code className="text-xs text-muted-foreground break-all">{f.key}</code>
+                  </span>
+                  <span className="flex items-center gap-2 shrink-0">
                     {ov && <Badge variant="secondary" className="text-[10px]">override</Badge>}
-                    <span className="font-medium">{v == null ? t("superadmin.detail.unlimited") : v}</span>
+                    <span className="font-medium tabular-nums">{v == null ? t("superadmin.detail.unlimited") : v}</span>
                   </span>
                 </li>
               );
