@@ -350,6 +350,28 @@ export default function DevisEditorPage() {
     return { recipient: recipient || "", subject, body };
   }, [readonly, snapshotClient, clientFull, previewCompany, number, t]);
 
+  // Premium gate: when creating a NEW devis without entitlement, show locked state.
+  if (isNew && !entLoading && !canCreate) {
+    return (
+      <PageBody>
+        <div className="mb-3">
+          <Button asChild variant="ghost" size="sm" className="gap-1">
+            <Link to="/app/devis"><ArrowLeft className="h-4 w-4" />{t("devis.backToList")}</Link>
+          </Button>
+        </div>
+        <div className="surface p-8 text-center">
+          <h2 className="font-serif text-2xl">{t("billing.gates.devis.title")}</h2>
+          <p className="text-muted-foreground mt-2 max-w-md mx-auto">{t("billing.gates.devis.description")}</p>
+          <div className="mt-5 flex justify-center gap-2">
+            <Button variant="outline" asChild><Link to="/app/devis">{t("devis.backToList")}</Link></Button>
+            <Button asChild><Link to="/app/settings/plan">{t("billing.upgrade.cta")}</Link></Button>
+          </div>
+        </div>
+        <UpgradeDialog open={gateOpen} onOpenChange={setGateOpen} featureKeyPrefix="billing.gates.devis" />
+      </PageBody>
+    );
+  }
+
   if (loading) return <PageBody><div className="surface p-6 text-sm text-muted-foreground">{t("common.loading")}</div></PageBody>;
 
   const previewNode = (
