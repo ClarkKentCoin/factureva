@@ -252,7 +252,40 @@ export default function CompanyPage() {
           </div>
         </section>
 
-        <Section title={t("company.sections.identity")} description={t("company.sections.identityDesc")}>
+        <section className="surface p-5 sm:p-6">
+          <div className="mb-4">
+            <h2 className="font-serif text-xl">{t("company.sections.signature")}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{t("company.sections.signatureDesc")}</p>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="h-20 w-40 rounded-md border border-border bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
+              {values.signature_url ? (
+                <img src={values.signature_url} alt="signature" className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("company.signature.empty")}</span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input ref={sigInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                className="hidden" onChange={onSignatureFileChange} />
+              <div className="flex gap-2 flex-wrap">
+                <Button type="button" variant="outline" size="sm" disabled={uploadingSignature}
+                  onClick={() => sigInputRef.current?.click()} className="gap-1">
+                  <Upload className="h-4 w-4" />
+                  {uploadingSignature ? t("common.loading") : (values.signature_url ? t("company.signature.replace") : t("company.signature.upload"))}
+                </Button>
+                {values.signature_url && (
+                  <Button type="button" variant="ghost" size="sm" onClick={onSignatureRemove} className="gap-1">
+                    <Trash2 className="h-4 w-4" />{t("company.signature.remove")}
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">{t("company.signature.hint")}</p>
+            </div>
+          </div>
+        </section>
+
+
           <Field id="company_name" label={t("company.fields.company_name")} required error={errMsg("company_name")} full>
             <Input id="company_name" value={values.company_name}
               onChange={(e) => set("company_name", e.target.value)} />
