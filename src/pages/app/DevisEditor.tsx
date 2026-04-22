@@ -350,6 +350,7 @@ export default function DevisEditorPage() {
       company={previewCompany}
       client={previewClient}
       kind="devis"
+      clientSignatureUrl={clientSignatureUrl}
     />
   );
 
