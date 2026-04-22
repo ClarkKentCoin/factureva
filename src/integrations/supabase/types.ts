@@ -1060,6 +1060,7 @@ export type Database = {
           id: string
           name: string
           slug: string | null
+          suspended_at: string | null
           updated_at: string
         }
         Insert: {
@@ -1071,6 +1072,7 @@ export type Database = {
           id?: string
           name: string
           slug?: string | null
+          suspended_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -1082,6 +1084,7 @@ export type Database = {
           id?: string
           name?: string
           slug?: string | null
+          suspended_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1194,6 +1197,16 @@ export type Database = {
       is_tenant_member: {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
+      }
+      log_superadmin_action: {
+        Args: {
+          _action: string
+          _entity_id: string
+          _entity_type: string
+          _metadata: Json
+          _tenant_id: string
+        }
+        Returns: string
       }
       tenant_role_of: {
         Args: { _tenant_id: string; _user_id: string }
