@@ -21,11 +21,21 @@ import { toast } from "sonner";
 export default function WorkspacesPage() {
   const { t } = useTranslation();
   const nav = useNavigate();
+  const [params, setParams] = useSearchParams();
   const { memberships, currentTenantId, setCurrentTenantId, refresh } = useAuth();
 
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (params.get("new") === "1") {
+      setShowCreate(true);
+      params.delete("new");
+      setParams(params, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [editing, setEditing] = useState<{ id: string; name: string } | null>(null);
   const [confirmArchive, setConfirmArchive] = useState<{ id: string; name: string } | null>(null);
