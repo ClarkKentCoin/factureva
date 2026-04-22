@@ -115,6 +115,7 @@ export async function saveDraft(
     postal_code: company.postal_code, city: company.city,
     email: company.email, phone: company.phone,
     logo_url: company.logo_url,
+    signature_url: (company as any).signature_url ?? null,
     payment_defaults: company.payment_defaults,
   } : {};
 

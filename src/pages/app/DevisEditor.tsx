@@ -13,7 +13,8 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Copy,
-  Download, Mail, ArrowRightLeft, CheckCircle2, XCircle, Clock,
+  Download, Mail, ArrowRightLeft, CheckCircle2, XCircle, Clock, Ban,
+  PenLine, Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -86,6 +87,9 @@ export default function DevisEditorPage() {
   const [downloading, setDownloading] = useState(false);
   const [lastSentAt, setLastSentAt] = useState<string | null>(null);
   const [lastSentTo, setLastSentTo] = useState<string | null>(null);
+  const [clientSignatureUrl, setClientSignatureUrl] = useState<string | null>(null);
+  const [uploadingClientSig, setUploadingClientSig] = useState(false);
+  const clientSigInputRef = useRef<HTMLInputElement | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const offscreenRef = useRef<HTMLDivElement | null>(null);
 
@@ -134,6 +138,7 @@ export default function DevisEditorPage() {
           })) : [newEmptyLine(0)]);
           setLastSentAt((inv as { last_sent_at?: string | null }).last_sent_at ?? null);
           setLastSentTo((inv as { last_sent_to?: string | null }).last_sent_to ?? null);
+          setClientSignatureUrl((inv as { client_signature_url?: string | null }).client_signature_url ?? null);
           if (inv.status !== "draft") {
             setSnapshotSeller((inv.seller_snapshot ?? null) as PreviewCompany | null);
             setSnapshotClient((inv.client_snapshot ?? null) as PreviewClient | null);
@@ -163,6 +168,7 @@ export default function DevisEditorPage() {
 
   const previewCompany: PreviewCompany | null = readonly ? snapshotSeller : (company ? {
     logo_url: company.logo_url,
+    signature_url: (company as any).signature_url ?? null,
     company_name: company.company_name,
     legal_name: company.legal_name,
     address_line1: company.address_line1, address_line2: company.address_line2,
@@ -260,6 +266,50 @@ export default function DevisEditorPage() {
     } catch { toast.error(t("common.saveError")); }
   };
 
+  const onClientSigUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !currentTenantId || !invoice.id) return;
+    if (!/^image\/(png|jpe?g|svg\+xml|webp)$/i.test(file.type)) {
+      toast.error(t("devis.signature.errors.type")); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("devis.signature.errors.size")); return;
+    }
+    setUploadingClientSig(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${currentTenantId}/client-sig-${invoice.id}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("signatures").upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("signatures").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: updErr } = await supabase
+        .from("invoices")
+        .update({ client_signature_url: url } as any)
+        .eq("id", invoice.id);
+      if (updErr) throw updErr;
+      setClientSignatureUrl(url);
+      toast.success(t("devis.signature.toasts.uploaded"));
+    } catch (err: any) {
+      toast.error(err?.message || t("devis.signature.errors.upload"));
+    } finally { setUploadingClientSig(false); }
+  };
+
+  const onClientSigRemove = async () => {
+    if (!invoice.id) return;
+    try {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ client_signature_url: null } as any)
+        .eq("id", invoice.id);
+      if (error) throw error;
+      setClientSignatureUrl(null);
+      toast.success(t("devis.signature.toasts.removed"));
+    } catch { toast.error(t("common.saveError")); }
+  };
+
   const pdfFilename = () => {
     const base = number ?? `devis-draft-${invoice.id ?? "new"}`;
     return `${base}.pdf`.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -301,6 +351,7 @@ export default function DevisEditorPage() {
       company={previewCompany}
       client={previewClient}
       kind="devis"
+      clientSignatureUrl={clientSignatureUrl}
     />
   );
 
@@ -348,11 +399,13 @@ export default function DevisEditorPage() {
                 </Button>
               </>
             )}
-            {status === "sent" && (
+            {(status === "sent" || status === "accepted") && (
               <>
-                <Button variant="outline" onClick={() => setLifecycle("accepted")} disabled={statusUpdating} className="gap-1">
-                  <CheckCircle2 className="h-4 w-4" />{t("devis.actions.markAccepted")}
-                </Button>
+                {status !== "accepted" && (
+                  <Button variant="outline" onClick={() => setLifecycle("accepted")} disabled={statusUpdating} className="gap-1">
+                    <CheckCircle2 className="h-4 w-4" />{t("devis.actions.markAccepted")}
+                  </Button>
+                )}
                 <Button variant="outline" onClick={() => setLifecycle("rejected")} disabled={statusUpdating} className="gap-1">
                   <XCircle className="h-4 w-4" />{t("devis.actions.markRejected")}
                 </Button>
@@ -364,6 +417,11 @@ export default function DevisEditorPage() {
             {(status === "accepted" || status === "sent") && invoice.id && (
               <Button onClick={onConvert} className="gap-1">
                 <ArrowRightLeft className="h-4 w-4" />{t("devis.actions.convert")}
+              </Button>
+            )}
+            {(status === "draft" || status === "sent") && invoice.id && (
+              <Button variant="outline" onClick={() => setLifecycle("cancelled")} disabled={statusUpdating} className="gap-1">
+                <Ban className="h-4 w-4" />{t("invoices.cancel")}
               </Button>
             )}
             {!isNew && (
@@ -400,6 +458,37 @@ export default function DevisEditorPage() {
               when: new Date(lastSentAt).toLocaleString(locale),
             })}
           </span>
+        </div>
+      )}
+
+      {!isNew && invoice.id && (
+        <div className="surface p-4 mb-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 min-w-0">
+              <PenLine className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
+                <div className="text-sm font-medium">{t("devis.signature.clientTitle")}</div>
+                <div className="text-xs text-muted-foreground">{t("devis.signature.clientHint")}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {clientSignatureUrl && (
+                <img src={clientSignatureUrl} alt="client signature" className="h-10 max-w-[140px] object-contain border border-border rounded" />
+              )}
+              <input ref={clientSigInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                className="hidden" onChange={onClientSigUpload} />
+              <Button type="button" variant="outline" size="sm" disabled={uploadingClientSig}
+                onClick={() => clientSigInputRef.current?.click()} className="gap-1">
+                <Upload className="h-4 w-4" />
+                {uploadingClientSig ? t("common.loading") : (clientSignatureUrl ? t("devis.signature.replace") : t("devis.signature.upload"))}
+              </Button>
+              {clientSignatureUrl && (
+                <Button type="button" variant="ghost" size="sm" onClick={onClientSigRemove} className="gap-1">
+                  <Trash2 className="h-4 w-4" />{t("devis.signature.remove")}
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

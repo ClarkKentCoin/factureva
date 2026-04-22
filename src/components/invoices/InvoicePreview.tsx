@@ -10,6 +10,7 @@ import type { EditorInvoice, EditorLine } from "@/lib/invoices";
 
 export type PreviewCompany = {
   logo_url?: string | null;
+  signature_url?: string | null;
   company_name?: string | null;
   legal_name?: string | null;
   address_line1?: string | null;
@@ -45,10 +46,13 @@ type Props = {
   legalMentions?: { key: string; reason: string }[];
   /** "invoice" (default) or "devis" — controls title + status namespace + date label. */
   kind?: "invoice" | "devis";
+  /** Optional client-signature image URL — only rendered when kind === "devis". */
+  clientSignatureUrl?: string | null;
 };
 
 export default function InvoicePreview({
   invoice, lines, number, status, company, client, legalMentions = [], kind = "invoice",
+  clientSignatureUrl = null,
 }: Props) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
@@ -231,13 +235,51 @@ export default function InvoicePreview({
           </section>
         )}
 
-        {/* Devis-specific footer */}
+        {/* Devis-specific footer + signature blocks */}
         {isDevis && (
-          <section className="pt-4 border-t border-border mt-4">
-            <div className="text-[11px] text-muted-foreground italic">
-              {t("devis.preview.acceptanceNote")}
-            </div>
-          </section>
+          <>
+            <section className="pt-4 border-t border-border mt-4">
+              <div className="text-[11px] text-muted-foreground italic">
+                {t("devis.preview.acceptanceNote")}
+              </div>
+            </section>
+            <section className="pt-6 mt-2 grid grid-cols-2 gap-6">
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">
+                  {t("devis.preview.companySignature")}
+                </div>
+                <div className="h-20 border-b border-border flex items-end">
+                  {company?.signature_url ? (
+                    <img
+                      src={company.signature_url}
+                      alt="company signature"
+                      className="max-h-20 max-w-full object-contain"
+                    />
+                  ) : null}
+                </div>
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  {company?.company_name ?? ""}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">
+                  {t("devis.preview.clientSignature")}
+                </div>
+                <div className="h-20 border-b border-border flex items-end">
+                  {clientSignatureUrl ? (
+                    <img
+                      src={clientSignatureUrl}
+                      alt="client signature"
+                      className="max-h-20 max-w-full object-contain"
+                    />
+                  ) : null}
+                </div>
+                <div className="text-[10px] text-muted-foreground mt-1">
+                  {client?.display_name ?? ""}
+                </div>
+              </div>
+            </section>
+          </>
         )}
 
         {/* Legal mentions */}

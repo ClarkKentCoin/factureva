@@ -70,7 +70,9 @@ export default function CompanyPage() {
   const [values, setValues] = useState<CompanyFormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingSignature, setUploadingSignature] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const sigInputRef = useRef<HTMLInputElement | null>(null);
 
   const onLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,6 +101,35 @@ export default function CompanyPage() {
 
   const onLogoRemove = () => {
     setValues((p) => ({ ...p, logo_url: null }));
+  };
+
+  const onSignatureFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !currentTenantId) return;
+    if (!/^image\/(png|jpe?g|svg\+xml|webp)$/i.test(file.type)) {
+      toast.error(t("company.toasts.signatureType")); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("company.toasts.signatureSize")); return;
+    }
+    setUploadingSignature(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${currentTenantId}/company-signature-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("signatures").upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("signatures").getPublicUrl(path);
+      setValues((p) => ({ ...p, signature_url: pub.publicUrl }));
+      toast.success(t("company.toasts.signatureUploaded"));
+    } catch (err: any) {
+      toast.error(err?.message || t("company.toasts.signatureError"));
+    } finally { setUploadingSignature(false); }
+  };
+
+  const onSignatureRemove = () => {
+    setValues((p) => ({ ...p, signature_url: null }));
   };
 
   useEffect(() => {
@@ -217,6 +248,39 @@ export default function CompanyPage() {
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{t("company.logo.hint")}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="surface p-5 sm:p-6">
+          <div className="mb-4">
+            <h2 className="font-serif text-xl">{t("company.sections.signature")}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{t("company.sections.signatureDesc")}</p>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="h-20 w-40 rounded-md border border-border bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
+              {values.signature_url ? (
+                <img src={values.signature_url} alt="signature" className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("company.signature.empty")}</span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input ref={sigInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                className="hidden" onChange={onSignatureFileChange} />
+              <div className="flex gap-2 flex-wrap">
+                <Button type="button" variant="outline" size="sm" disabled={uploadingSignature}
+                  onClick={() => sigInputRef.current?.click()} className="gap-1">
+                  <Upload className="h-4 w-4" />
+                  {uploadingSignature ? t("common.loading") : (values.signature_url ? t("company.signature.replace") : t("company.signature.upload"))}
+                </Button>
+                {values.signature_url && (
+                  <Button type="button" variant="ghost" size="sm" onClick={onSignatureRemove} className="gap-1">
+                    <Trash2 className="h-4 w-4" />{t("company.signature.remove")}
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">{t("company.signature.hint")}</p>
             </div>
           </div>
         </section>
