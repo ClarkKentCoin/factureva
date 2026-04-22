@@ -805,7 +805,14 @@ const resources = {
           remainingDueAfterCredit: "Solde dû après avoir",
         },
         totals: { totalCredit: "Total de l'avoir" },
-        preview: { title: "Aperçu de l'avoir", noLines: "Ajoutez des lignes pour voir l'aperçu." },
+        preview: {
+          title: "Aperçu de l'avoir",
+          noLines: "Ajoutez des lignes pour voir l'aperçu.",
+          documentTitle: "Avoir",
+          sourceInvoice: "Facture d'origine",
+          correctionReason: "Motif de la correction",
+          legalNotice: "Avoir émis en correction de la facture mentionnée ci-dessus, conformément à l'article 289 du Code général des impôts.",
+        },
         toasts: {
           saved: "Brouillon enregistré.",
           issued: "Avoir {{number}} émis.",
@@ -1516,7 +1523,14 @@ const resources = {
           remainingDueAfterCredit: "Remaining due after credit",
         },
         totals: { totalCredit: "Total credit" },
-        preview: { title: "Credit note preview", noLines: "Add lines to see the preview." },
+        preview: {
+          title: "Credit note preview",
+          noLines: "Add lines to see the preview.",
+          documentTitle: "Credit Note",
+          sourceInvoice: "Source invoice",
+          correctionReason: "Correction reason",
+          legalNotice: "Credit note issued to correct the invoice referenced above, in accordance with applicable French tax regulations (CGI art. 289).",
+        },
         toasts: {
           saved: "Draft saved.",
           issued: "Credit note {{number}} issued.",
@@ -2230,7 +2244,14 @@ const resources = {
           remainingDueAfterCredit: "Остаток к оплате после корректировки",
         },
         totals: { totalCredit: "Итого по кредит-ноте" },
-        preview: { title: "Предпросмотр кредит-ноты", noLines: "Добавьте позиции для предпросмотра." },
+        preview: {
+          title: "Предпросмотр кредит-ноты",
+          noLines: "Добавьте позиции для предпросмотра.",
+          documentTitle: "Кредит-нота",
+          sourceInvoice: "Исходный счёт",
+          correctionReason: "Причина корректировки",
+          legalNotice: "Кредит-нота выпущена в корректировку указанного выше счёта, в соответствии с применимым налоговым законодательством Франции (CGI ст. 289).",
+        },
         toasts: {
           saved: "Черновик сохранён.",
           issued: "Кредит-нота {{number}} выпущена.",
