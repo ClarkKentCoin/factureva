@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,12 +21,14 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 export default function Onboarding() {
   const { t, i18n } = useTranslation();
   const nav = useNavigate();
-  const { user, refresh, setCurrentTenantId } = useAuth();
+  const { user, profileLoading, memberships, refresh, setCurrentTenantId } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [workspaceName, setWorkspaceName] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (!user) return null;
+  // Never trap an existing member in the create-workspace screen on login.
+  if (!profileLoading && memberships.length > 0) return <Navigate to="/app" replace />;
 
   const createWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();

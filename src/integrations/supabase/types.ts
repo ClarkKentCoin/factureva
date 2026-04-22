@@ -1052,6 +1052,7 @@ export type Database = {
       }
       tenants: {
         Row: {
+          archived_at: string | null
           created_at: string
           created_by: string | null
           default_country: Database["public"]["Enums"]["country_code"]
@@ -1062,6 +1063,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           created_by?: string | null
           default_country?: Database["public"]["Enums"]["country_code"]
@@ -1072,6 +1074,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           created_by?: string | null
           default_country?: Database["public"]["Enums"]["country_code"]
