@@ -1439,6 +1439,7 @@ const resources = {
         company: "Компания", items: "Каталог", activities: "Виды деятельности",
         settings: "Настройки", signOut: "Выйти", superadmin: "Суперадмин", plan: "Тариф", team: "Команда",
         creditNotes: "Кредит-ноты",
+      },
       landing: {
         heroSubtitle: "Счета, сметы, клиенты, платежи. Создано для Франции — с прицелом на мир.",
       },
