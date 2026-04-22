@@ -13,7 +13,8 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, Send, Save, Eye, Copy,
-  Download, Mail, ArrowRightLeft, CheckCircle2, XCircle, Clock,
+  Download, Mail, ArrowRightLeft, CheckCircle2, XCircle, Clock, Ban,
+  PenLine, Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -398,11 +399,13 @@ export default function DevisEditorPage() {
                 </Button>
               </>
             )}
-            {status === "sent" && (
+            {(status === "sent" || status === "accepted") && (
               <>
-                <Button variant="outline" onClick={() => setLifecycle("accepted")} disabled={statusUpdating} className="gap-1">
-                  <CheckCircle2 className="h-4 w-4" />{t("devis.actions.markAccepted")}
-                </Button>
+                {status !== "accepted" && (
+                  <Button variant="outline" onClick={() => setLifecycle("accepted")} disabled={statusUpdating} className="gap-1">
+                    <CheckCircle2 className="h-4 w-4" />{t("devis.actions.markAccepted")}
+                  </Button>
+                )}
                 <Button variant="outline" onClick={() => setLifecycle("rejected")} disabled={statusUpdating} className="gap-1">
                   <XCircle className="h-4 w-4" />{t("devis.actions.markRejected")}
                 </Button>
@@ -414,6 +417,11 @@ export default function DevisEditorPage() {
             {(status === "accepted" || status === "sent") && invoice.id && (
               <Button onClick={onConvert} className="gap-1">
                 <ArrowRightLeft className="h-4 w-4" />{t("devis.actions.convert")}
+              </Button>
+            )}
+            {(status === "draft" || status === "sent") && invoice.id && (
+              <Button variant="outline" onClick={() => setLifecycle("cancelled")} disabled={statusUpdating} className="gap-1">
+                <Ban className="h-4 w-4" />{t("invoices.cancel")}
               </Button>
             )}
             {!isNew && (
