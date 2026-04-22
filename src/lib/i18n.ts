@@ -451,6 +451,8 @@ const resources = {
           documentTitle: "Devis",
           validUntil: "Valable jusqu'au",
           acceptanceNote: "Bon pour accord — date et signature du client.",
+          companySignature: "Signature de l'entreprise",
+          clientSignature: "Signature du client",
         },
         actions: {
           issue: "Émettre le devis",
@@ -493,10 +495,6 @@ const resources = {
           remove: "Supprimer",
           toasts: { uploaded: "Signature client enregistrée.", removed: "Signature client supprimée." },
           errors: { type: "Format non supporté (PNG, JPG, SVG, WEBP).", size: "Fichier trop volumineux (max 2 Mo).", upload: "Échec du téléversement de la signature." },
-        },
-        preview: {
-          companySignature: "Signature de l'entreprise",
-          clientSignature: "Signature du client",
         },
       },
     },
