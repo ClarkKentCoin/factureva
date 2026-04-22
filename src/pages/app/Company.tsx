@@ -70,7 +70,9 @@ export default function CompanyPage() {
   const [values, setValues] = useState<CompanyFormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingSignature, setUploadingSignature] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const sigInputRef = useRef<HTMLInputElement | null>(null);
 
   const onLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,6 +101,35 @@ export default function CompanyPage() {
 
   const onLogoRemove = () => {
     setValues((p) => ({ ...p, logo_url: null }));
+  };
+
+  const onSignatureFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !currentTenantId) return;
+    if (!/^image\/(png|jpe?g|svg\+xml|webp)$/i.test(file.type)) {
+      toast.error(t("company.toasts.signatureType")); return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("company.toasts.signatureSize")); return;
+    }
+    setUploadingSignature(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${currentTenantId}/company-signature-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("signatures").upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("signatures").getPublicUrl(path);
+      setValues((p) => ({ ...p, signature_url: pub.publicUrl }));
+      toast.success(t("company.toasts.signatureUploaded"));
+    } catch (err: any) {
+      toast.error(err?.message || t("company.toasts.signatureError"));
+    } finally { setUploadingSignature(false); }
+  };
+
+  const onSignatureRemove = () => {
+    setValues((p) => ({ ...p, signature_url: null }));
   };
 
   useEffect(() => {
