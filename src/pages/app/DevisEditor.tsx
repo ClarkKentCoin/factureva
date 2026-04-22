@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { useEntitlements } from "@/hooks/use-entitlements";
+import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
 import { PageBody, PageHeader } from "@/components/layout/PageScaffold";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +61,15 @@ export default function DevisEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentTenantId, user } = useAuth();
+  const { hasFeature, loading: entLoading } = useEntitlements();
+  const canCreate = hasFeature("quotes.create");
   const isNew = !id || id === "new";
+  const [gateOpen, setGateOpen] = useState(false);
+
+  // Block creating a NEW devis when feature not granted. Existing devis remain readable.
+  useEffect(() => {
+    if (isNew && !entLoading && !canCreate) setGateOpen(true);
+  }, [isNew, entLoading, canCreate]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
