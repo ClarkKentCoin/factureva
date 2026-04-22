@@ -171,9 +171,17 @@ export default function InvoiceEditorPage() {
 
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
   const readonly = status !== "draft";
-  const visibleStatus = computeVisibleStatus(status, invoice.due_date, paidAmount, totals.total_ttc);
-  const due = balanceDue(totals.total_ttc, paidAmount);
+  const visibleStatus = computeVisibleStatus(status, invoice.due_date, paidAmount, totals.total_ttc, creditedAmount);
+  const due = balanceDue(totals.total_ttc, paidAmount, creditedAmount);
   const canRecordPayment = (status === "issued" || status === "paid") && !!invoice.id;
+  const canShowCreateCredit = status === "issued" || status === "paid" || status === "overdue";
+  const remainingCreditable = Math.max(0, totals.total_ttc - creditedAmount);
+
+  const onCreateCreditNote = (mode: "full" | "partial") => {
+    if (!invoice.id) return;
+    if (!canCreateCredit) { setCreditGateOpen(true); return; }
+    navigate(`/app/credit-notes/new?invoice=${invoice.id}&mode=${mode}`);
+  };
 
   const refreshPayments = async () => {
     if (!invoice.id) return;
