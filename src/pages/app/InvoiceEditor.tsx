@@ -468,6 +468,43 @@ export default function InvoiceEditorPage() {
         </div>
       )}
 
+      {linkedCredits.length > 0 && (
+        <div className="surface p-5 mb-4">
+          <h2 className="font-serif text-lg flex items-center gap-2 mb-3">
+            <FileMinus className="h-4 w-4" />{t("creditNotes.linkedTitle")}
+          </h2>
+          <ul className="divide-y divide-border text-sm">
+            {linkedCredits.map((c: any) => (
+              <li key={c.id} className="py-2 flex items-center justify-between gap-2 flex-wrap">
+                <div className="min-w-0">
+                  <Link to={`/app/credit-notes/${c.id}`} className="font-mono hover:underline">
+                    {c.invoice_number ?? t("creditNotes.draftLabel")}
+                  </Link>
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {t(`creditNotes.status.${c.status}`, { defaultValue: c.status })}
+                    {c.issue_date && <> · {new Date(c.issue_date).toLocaleDateString(locale)}</>}
+                  </span>
+                </div>
+                <div className="font-mono">{formatMoney(Number(c.total_ttc), c.currency_code, locale)}</div>
+              </li>
+            ))}
+          </ul>
+          {canShowCreateCredit && remainingCreditable > 0 && (
+            <div className="mt-3 flex gap-2 flex-wrap">
+              <Button size="sm" variant="outline" onClick={() => onCreateCreditNote("partial")} className="gap-1">
+                <Plus className="h-4 w-4" />{t("creditNotes.actions.createPartial")}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <UpgradeDialog
+        open={creditGateOpen}
+        onOpenChange={setCreditGateOpen}
+        featureKeyPrefix="billing.gates.creditNotes"
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* LEFT: structured editor (or read-only summary) */}
         <div className="space-y-4">
