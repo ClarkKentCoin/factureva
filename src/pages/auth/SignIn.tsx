@@ -21,7 +21,9 @@ export default function SignIn() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
-    nav("/app");
+    // GuestOnly + PostLoginRedirect on `/` will route correctly:
+    // super_admin → /superadmin, tenant user → /app, no tenant → /onboarding.
+    nav("/post-login", { replace: true });
   };
 
   return (

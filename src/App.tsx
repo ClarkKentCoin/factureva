@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { AuthProvider } from "@/lib/auth-context";
 import { EntitlementsProvider } from "@/hooks/use-entitlements";
-import { RequireAuth, RequireSuperAdmin, RequireTenant, GuestOnly } from "@/lib/route-guards";
+import { RequireAuth, RequireSuperAdmin, RequireTenant, GuestOnly, PostLoginRedirect } from "@/lib/route-guards";
 import { AppShell } from "@/components/layout/AppShell";
 import { SuperAdminShell } from "@/components/layout/SuperAdminShell";
 
@@ -48,6 +48,9 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth/sign-in" element={<GuestOnly><SignIn /></GuestOnly>} />
             <Route path="/auth/sign-up" element={<GuestOnly><SignUp /></GuestOnly>} />
+
+            {/* Post-login dispatcher: routes super_admin → /superadmin, tenant user → /app, no tenant → /onboarding */}
+            <Route path="/post-login" element={<RequireAuth><PostLoginRedirect /></RequireAuth>} />
 
             {/* Onboarding (authed but tenant not required) */}
             <Route path="/onboarding" element={<RequireAuth><Onboarding /></RequireAuth>} />

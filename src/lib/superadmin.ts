@@ -314,3 +314,51 @@ export async function listSuperadminAudit(limit = 100) {
   if (error) throw error;
   return data ?? [];
 }
+
+/**
+ * Aggregated read view for the Plans & Features console:
+ *   - all plans (active + inactive)
+ *   - all features
+ *   - feature mappings per plan (enabled / limit_value)
+ *   - count of tenants currently on each plan
+ *
+ * Read-only. Safe for super_admin to call.
+ */
+export async function fetchPlansOverview() {
+  const [plansRes, featuresRes, mappingRes, subsRes] = await Promise.all([
+    supabase.from("plans").select("id, code, name, description, is_active").order("code"),
+    supabase.from("features").select("id, key, name, description, is_limit").order("key"),
+    supabase.from("plan_features").select("plan_id, feature_id, enabled, limit_value"),
+    supabase.from("tenant_subscriptions").select("plan_id, status").eq("status", "active"),
+  ]);
+
+  const plans = (plansRes.data ?? []) as Array<{
+    id: string; code: string; name: string; description: string | null; is_active: boolean;
+  }>;
+  const features = (featuresRes.data ?? []) as Array<{
+    id: string; key: string; name: string; description: string | null; is_limit: boolean;
+  }>;
+  const mapping = (mappingRes.data ?? []) as Array<{
+    plan_id: string; feature_id: string; enabled: boolean; limit_value: number | null;
+  }>;
+  const subs = (subsRes.data ?? []) as Array<{ plan_id: string; status: string }>;
+
+  const tenantCountByPlan = new Map<string, number>();
+  for (const s of subs) {
+    tenantCountByPlan.set(s.plan_id, (tenantCountByPlan.get(s.plan_id) ?? 0) + 1);
+  }
+
+  // featureId -> set of planIds where mapping exists
+  const planFeatureIndex = new Map<string, Map<string, { enabled: boolean; limit_value: number | null }>>();
+  for (const m of mapping) {
+    if (!planFeatureIndex.has(m.plan_id)) planFeatureIndex.set(m.plan_id, new Map());
+    planFeatureIndex.get(m.plan_id)!.set(m.feature_id, { enabled: m.enabled, limit_value: m.limit_value });
+  }
+
+  return {
+    plans,
+    features,
+    tenantCountByPlan,
+    planFeatureIndex,
+  };
+}

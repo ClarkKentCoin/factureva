@@ -30,10 +30,34 @@ export function RequireSuperAdmin({ children }: { children: JSX.Element }) {
 }
 
 export function GuestOnly({ children }: { children: JSX.Element }) {
-  const { session, loading } = useAuth();
-  if (loading) return <FullPageLoader />;
-  if (session) return <Navigate to="/app" replace />;
+  const { session, loading, profileLoading, isSuperAdmin, memberships } = useAuth();
+  if (loading || (session && profileLoading)) return <FullPageLoader />;
+  if (session) {
+    // Super admins land on the platform console first, even if they also have
+    // tenant memberships. Returning to the tenant app is an explicit action.
+    if (isSuperAdmin) return <Navigate to="/superadmin" replace />;
+    if (memberships.length === 0) return <Navigate to="/onboarding" replace />;
+    return <Navigate to="/app" replace />;
+  }
   return children;
+}
+
+/**
+ * Decides where a freshly authenticated user should land. Used by SignIn and
+ * by the post-login default route.
+ *
+ * Rules:
+ *  - super_admin → /superadmin (always primary, even if tenant memberships exist)
+ *  - no tenant   → /onboarding
+ *  - otherwise   → /app
+ */
+export function PostLoginRedirect() {
+  const { session, loading, profileLoading, isSuperAdmin, memberships } = useAuth();
+  if (loading || (session && profileLoading)) return <FullPageLoader />;
+  if (!session) return <Navigate to="/auth/sign-in" replace />;
+  if (isSuperAdmin) return <Navigate to="/superadmin" replace />;
+  if (memberships.length === 0) return <Navigate to="/onboarding" replace />;
+  return <Navigate to="/app" replace />;
 }
 
 function FullPageLoader() {
