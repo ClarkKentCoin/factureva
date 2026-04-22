@@ -5,7 +5,7 @@ import { PageBody, PageHeader, StatCard, EmptyState } from "@/components/layout/
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth-context";
-import { FileText, UserPlus, Building2, CheckCircle2 } from "lucide-react";
+import { FileText, FileSignature, UserPlus, Building2, CheckCircle2 } from "lucide-react";
 import { loadPrimaryCompany } from "@/lib/company-profile";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/invoice-totals";
@@ -180,6 +180,9 @@ export default function Dashboard() {
           <div className="space-y-2">
             <Button asChild variant="outline" className="w-full justify-start gap-2">
               <Link to="/app/invoices/new"><FileText className="h-4 w-4" />{t("dashboard.newInvoice")}</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full justify-start gap-2">
+              <Link to="/app/devis/new"><FileSignature className="h-4 w-4" />{t("dashboard.newDevis")}</Link>
             </Button>
             <Button asChild variant="outline" className="w-full justify-start gap-2">
               <Link to="/app/clients"><UserPlus className="h-4 w-4" />{t("dashboard.newClient")}</Link>
