@@ -138,7 +138,7 @@ export default function SuperAdminPlans() {
                       <div className="border-t border-border pt-3 space-y-3">
                         <PlanFeatureBlock
                           title={t("superadmin.plans.included")}
-                          icon={<Check className="h-3.5 w-3.5 text-emerald-600" />}
+                          icon={<Check className="h-3.5 w-3.5 text-accent" />}
                           rows={included.map((f) => ({ key: f.key, label: featureLabel(f.key, f.name, false) }))}
                         />
                         <PlanFeatureBlock
