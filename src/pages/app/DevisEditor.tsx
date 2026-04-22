@@ -461,6 +461,37 @@ export default function DevisEditorPage() {
         </div>
       )}
 
+      {!isNew && invoice.id && (
+        <div className="surface p-4 mb-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 min-w-0">
+              <PenLine className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
+                <div className="text-sm font-medium">{t("devis.signature.clientTitle")}</div>
+                <div className="text-xs text-muted-foreground">{t("devis.signature.clientHint")}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {clientSignatureUrl && (
+                <img src={clientSignatureUrl} alt="client signature" className="h-10 max-w-[140px] object-contain border border-border rounded" />
+              )}
+              <input ref={clientSigInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                className="hidden" onChange={onClientSigUpload} />
+              <Button type="button" variant="outline" size="sm" disabled={uploadingClientSig}
+                onClick={() => clientSigInputRef.current?.click()} className="gap-1">
+                <Upload className="h-4 w-4" />
+                {uploadingClientSig ? t("common.loading") : (clientSignatureUrl ? t("devis.signature.replace") : t("devis.signature.upload"))}
+              </Button>
+              {clientSignatureUrl && (
+                <Button type="button" variant="ghost" size="sm" onClick={onClientSigRemove} className="gap-1">
+                  <Trash2 className="h-4 w-4" />{t("devis.signature.remove")}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="space-y-4">
           <div className="surface p-5 space-y-4">
