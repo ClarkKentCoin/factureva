@@ -44,15 +44,19 @@ type Props = {
   company: PreviewCompany | null;
   client: PreviewClient | null;
   legalMentions?: { key: string; reason: string }[];
-  /** "invoice" (default) or "devis" — controls title + status namespace + date label. */
-  kind?: "invoice" | "devis";
+  /** "invoice" (default), "devis" or "credit_note" — controls title + status namespace + date label. */
+  kind?: "invoice" | "devis" | "credit_note";
   /** Optional client-signature image URL — only rendered when kind === "devis". */
   clientSignatureUrl?: string | null;
+  /** When kind === "credit_note": reference to the source invoice (number + date). */
+  sourceInvoice?: { number: string | null; issue_date: string | null } | null;
+  /** Optional correction reason text shown on the credit note PDF/preview. */
+  correctionReason?: string | null;
 };
 
 export default function InvoicePreview({
   invoice, lines, number, status, company, client, legalMentions = [], kind = "invoice",
-  clientSignatureUrl = null,
+  clientSignatureUrl = null, sourceInvoice = null, correctionReason = null,
 }: Props) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "fr" ? "fr-FR" : i18n.language === "ru" ? "ru-RU" : "en-GB";
@@ -62,6 +66,7 @@ export default function InvoicePreview({
   const fmt = (n: number) => formatMoney(n, invoice.currency_code, locale);
   const fmtDate = (s?: string | null) => (s ? new Date(s).toLocaleDateString(locale) : "—");
   const isDevis = kind === "devis";
+  const isCreditNote = kind === "credit_note";
 
   const companyLines = [
     company?.legal_name && company?.legal_name !== company?.company_name ? company.legal_name : null,
@@ -81,13 +86,19 @@ export default function InvoicePreview({
     client?.vat_number ? `${t("invoices.preview.vatNumberShort")} ${client.vat_number}` : null,
   ].filter(Boolean) as string[];
 
-  const documentTitle = isDevis
+  const documentTitle = isCreditNote
+    ? t("creditNotes.preview.documentTitle")
+    : isDevis
     ? t("devis.preview.documentTitle")
     : t("invoices.preview.documentTitle");
-  const dueLabel = isDevis
+  const dueLabel = isCreditNote
+    ? null
+    : isDevis
     ? t("devis.preview.validUntil")
     : t("invoices.preview.dueDate");
-  const statusLabel = isDevis
+  const statusLabel = isCreditNote
+    ? t(`creditNotes.status.${status}`, { defaultValue: status })
+    : isDevis
     ? t(`devis.status.${status}`, { defaultValue: status })
     : t(`invoices.status.${status}`, { defaultValue: status });
 
@@ -126,10 +137,23 @@ export default function InvoicePreview({
                 <span className="uppercase tracking-wide">{t("invoices.preview.issueDate")}</span>{" "}
                 <span className="text-foreground">{fmtDate(invoice.issue_date)}</span>
               </div>
-              <div>
-                <span className="uppercase tracking-wide">{dueLabel}</span>{" "}
-                <span className="text-foreground">{fmtDate(invoice.due_date)}</span>
-              </div>
+              {dueLabel && (
+                <div>
+                  <span className="uppercase tracking-wide">{dueLabel}</span>{" "}
+                  <span className="text-foreground">{fmtDate(invoice.due_date)}</span>
+                </div>
+              )}
+              {isCreditNote && sourceInvoice && (
+                <div>
+                  <span className="uppercase tracking-wide">{t("creditNotes.preview.sourceInvoice")}</span>{" "}
+                  <span className="text-foreground font-mono">
+                    {sourceInvoice.number ?? "—"}
+                  </span>
+                  {sourceInvoice.issue_date && (
+                    <> · <span className="text-foreground">{fmtDate(sourceInvoice.issue_date)}</span></>
+                  )}
+                </div>
+              )}
               <div className="uppercase tracking-wide">{statusLabel}</div>
             </div>
           </div>
@@ -219,8 +243,27 @@ export default function InvoicePreview({
           </section>
         )}
 
-        {/* Payment (invoices only — not relevant for quotes) */}
-        {!isDevis && (company?.payment_defaults?.iban || company?.payment_defaults?.payment_instructions) && (
+        {/* Credit-note specific: correction reason + legal wording */}
+        {isCreditNote && (
+          <>
+            {correctionReason && (
+              <section className="pt-4 border-t border-border mt-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                  {t("creditNotes.preview.correctionReason")}
+                </div>
+                <div className="whitespace-pre-line text-xs">{correctionReason}</div>
+              </section>
+            )}
+            <section className="pt-4 border-t border-border mt-4">
+              <div className="text-[11px] text-muted-foreground italic">
+                {t("creditNotes.preview.legalNotice")}
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* Payment (invoices only — not relevant for quotes or credit notes) */}
+        {!isDevis && !isCreditNote && (company?.payment_defaults?.iban || company?.payment_defaults?.payment_instructions) && (
           <section className="pt-4 border-t border-border mt-4">
             <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
               {t("invoices.preview.paymentTitle")}

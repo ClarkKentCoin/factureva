@@ -624,6 +624,7 @@ export type Database = {
           client_signature_url: string | null
           client_snapshot: Json
           company_id: string | null
+          correction_reason: string | null
           created_at: string
           created_by: string | null
           currency_code: string
@@ -642,6 +643,7 @@ export type Database = {
           paid_amount: number
           seller_snapshot: Json
           source_devis_id: string | null
+          source_invoice_id: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht: number
           tenant_id: string
@@ -656,6 +658,7 @@ export type Database = {
           client_signature_url?: string | null
           client_snapshot?: Json
           company_id?: string | null
+          correction_reason?: string | null
           created_at?: string
           created_by?: string | null
           currency_code?: string
@@ -674,6 +677,7 @@ export type Database = {
           paid_amount?: number
           seller_snapshot?: Json
           source_devis_id?: string | null
+          source_invoice_id?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht?: number
           tenant_id: string
@@ -688,6 +692,7 @@ export type Database = {
           client_signature_url?: string | null
           client_snapshot?: Json
           company_id?: string | null
+          correction_reason?: string | null
           created_at?: string
           created_by?: string | null
           currency_code?: string
@@ -706,6 +711,7 @@ export type Database = {
           paid_amount?: number
           seller_snapshot?: Json
           source_devis_id?: string | null
+          source_invoice_id?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal_ht?: number
           tenant_id?: string
@@ -732,6 +738,13 @@ export type Database = {
           {
             foreignKeyName: "invoices_source_devis_id_fkey"
             columns: ["source_devis_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_source_invoice_id_fkey"
+            columns: ["source_invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
             referencedColumns: ["id"]
@@ -1316,7 +1329,7 @@ export type Database = {
         | "franchise_base_tva"
         | "other"
       interface_language: "fr" | "en" | "ru"
-      invoice_document_type: "invoice" | "devis"
+      invoice_document_type: "invoice" | "devis" | "credit_note"
       invoice_status:
         | "draft"
         | "issued"
@@ -1510,7 +1523,7 @@ export const Constants = {
         "other",
       ],
       interface_language: ["fr", "en", "ru"],
-      invoice_document_type: ["invoice", "devis"],
+      invoice_document_type: ["invoice", "devis", "credit_note"],
       invoice_status: [
         "draft",
         "issued",
