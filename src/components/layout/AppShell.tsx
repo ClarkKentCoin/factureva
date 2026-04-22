@@ -29,6 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/app/items", label: t("nav.items"), icon: Package },
     { to: "/app/activities", label: t("nav.activities"), icon: Briefcase },
     { to: "/app/company", label: t("nav.company"), icon: Building2 },
+    { to: "/app/settings/team", label: t("nav.team"), icon: Users },
     { to: "/app/settings/plan", label: t("nav.plan"), icon: Sparkles },
     { to: "/app/settings", label: t("nav.settings"), icon: Settings },
   ];

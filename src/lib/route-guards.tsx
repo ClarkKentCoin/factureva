@@ -31,8 +31,12 @@ export function RequireSuperAdmin({ children }: { children: JSX.Element }) {
 
 export function GuestOnly({ children }: { children: JSX.Element }) {
   const { session, loading, profileLoading, isSuperAdmin, memberships } = useAuth();
+  const location = useLocation();
   if (loading || (session && profileLoading)) return <FullPageLoader />;
   if (session) {
+    // Honor ?next=... when present (e.g. invite acceptance flow).
+    const next = new URLSearchParams(location.search).get("next");
+    if (next && next.startsWith("/")) return <Navigate to={next} replace />;
     // Super admins land on the platform console first, even if they also have
     // tenant memberships. Returning to the tenant app is an explicit action.
     if (isSuperAdmin) return <Navigate to="/superadmin" replace />;

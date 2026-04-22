@@ -26,6 +26,8 @@ import ClientsPage from "./pages/app/Clients";
 import ItemsPage from "./pages/app/Items";
 import ActivitiesPage from "./pages/app/Activities";
 import PlanPage from "./pages/app/Plan";
+import TeamPage from "./pages/app/Team";
+import AcceptInvitePage from "./pages/auth/AcceptInvite";
 import SuperAdminOverview from "./pages/superadmin/Overview";
 import SuperAdminTenants from "./pages/superadmin/Tenants";
 import SuperAdminTenantDetail from "./pages/superadmin/TenantDetail";
@@ -73,7 +75,12 @@ const App = () => (
             <Route path="/app/workspaces" element={<RequireTenant><AppShell><WorkspacesPage /></AppShell></RequireTenant>} />
             <Route path="/app/settings" element={<RequireTenant><AppShell><SettingsPage /></AppShell></RequireTenant>} />
             <Route path="/app/settings/plan" element={<RequireTenant><AppShell><PlanPage /></AppShell></RequireTenant>} />
+            <Route path="/app/settings/team" element={<RequireTenant><AppShell><TeamPage /></AppShell></RequireTenant>} />
+            <Route path="/app/team" element={<Navigate to="/app/settings/team" replace />} />
             <Route path="/app/billing" element={<Navigate to="/app/settings/plan" replace />} />
+
+            {/* Public invite acceptance */}
+            <Route path="/invite/:token" element={<AcceptInvitePage />} />
 
             {/* Superadmin */}
             <Route path="/superadmin" element={<RequireSuperAdmin><SuperAdminShell><SuperAdminOverview /></SuperAdminShell></RequireSuperAdmin>} />

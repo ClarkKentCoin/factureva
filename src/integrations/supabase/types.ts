@@ -973,6 +973,59 @@ export type Database = {
           },
         ]
       }
+      tenant_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["tenant_role"]
+          status: string
+          tenant_id: string
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["tenant_role"]
+          status?: string
+          tenant_id: string
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["tenant_role"]
+          status?: string
+          tenant_id?: string
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_members: {
         Row: {
           created_at: string
@@ -1174,6 +1227,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { _token_hash: string }; Returns: string }
       claim_invoice_number: {
         Args: {
           _document_type: Database["public"]["Enums"]["invoice_document_type"]
@@ -1183,6 +1237,18 @@ export type Database = {
         Returns: string
       }
       create_initial_tenant: { Args: { _name: string }; Returns: string }
+      get_invitation_by_token_hash: {
+        Args: { _token_hash: string }
+        Returns: {
+          email: string
+          expires_at: string
+          id: string
+          role: Database["public"]["Enums"]["tenant_role"]
+          status: string
+          tenant_id: string
+          tenant_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
