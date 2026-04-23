@@ -23,7 +23,8 @@ const resources = {
         creditNotes: "Avoirs",
       },
       landing: {
-        heroSubtitle: "Factures, devis, clients, paiements. Conçu pour la France — pensé pour l'international.",
+        heroTitle: "La facturation française, claire, élégante, efficace.",
+        heroSubtitle: "Créez vos factures et devis, gérez vos clients et suivez vos paiements — dans un espace pensé pour les indépendants et petites entreprises en France.",
       },
       auth: {
         signIn: "Se connecter",
@@ -36,8 +37,10 @@ const resources = {
         createAccount: "Créer mon compte",
         welcome: "Bon retour parmi nous",
         startTitle: "Créez votre espace de facturation",
-        sideQuote: "« Une facturation française rigoureuse, pour des entrepreneurs sereins. »",
-        sideTags: "Multi-tenant · Conforme · Mobile-first",
+        signInSubtitle: "Retrouvez votre espace de facturation et reprenez là où vous vous êtes arrêté.",
+        signUpSubtitle: "Créez votre espace et commencez à facturer simplement.",
+        sideQuote: "La sérénité d'un outil clair pour vos devis et factures.",
+        sideTags: "Simple · Fiable · Professionnel",
         accountCreated: "Compte créé",
       },
       onboarding: {
@@ -52,6 +55,7 @@ const resources = {
       },
       dashboard: {
         welcome: "Bienvenue",
+        subtitle: "Pilotez vos devis, factures et paiements en un seul endroit.",
         revenue: "Chiffre d'affaires",
         unpaid: "Impayé",
         clients: "Clients",
@@ -838,15 +842,18 @@ const resources = {
         creditNotes: "Credit Notes",
       },
       landing: {
-        heroSubtitle: "Invoices, quotes, clients, payments. Built for France — designed for international.",
+        heroTitle: "French invoicing, clear, elegant, efficient.",
+        heroSubtitle: "Create invoices and quotes, manage clients, and track payments in one workspace built for freelancers and small businesses in France.",
       },
       auth: {
         signIn: "Sign in", signUp: "Create account", email: "Email", password: "Password",
         fullName: "Full name", noAccount: "No account yet?", haveAccount: "Already registered?",
         createAccount: "Create my account", welcome: "Welcome back",
         startTitle: "Set up your invoicing workspace",
-        sideQuote: "“Rigorous French invoicing, for serene entrepreneurs.”",
-        sideTags: "Multi-tenant · Compliant · Mobile-first",
+        signInSubtitle: "Access your invoicing workspace and pick up where you left off.",
+        signUpSubtitle: "Create your workspace and start invoicing with ease.",
+        sideQuote: "The confidence of a clear tool for your quotes and invoices.",
+        sideTags: "Simple · Reliable · Professional",
         accountCreated: "Account created",
       },
       onboarding: {
@@ -857,7 +864,9 @@ const resources = {
         companyProfileNote: "The full company profile form (legal form, SIREN/SIRET, VAT regime, legal mentions) is data-ready and will be wired in the next step.",
       },
       dashboard: {
-        welcome: "Welcome", revenue: "Revenue", unpaid: "Unpaid", clients: "Clients",
+        welcome: "Welcome",
+        subtitle: "Manage quotes, invoices, and payments in one place.",
+        revenue: "Revenue", unpaid: "Unpaid", clients: "Clients",
         recentActivity: "Recent activity", recentInvoices: "Recent invoices", viewAll: "View all",
         empty: "No recent activity.",
         quickActions: "Quick actions", newInvoice: "New invoice", newDevis: "New quote", newClient: "New client",
@@ -1555,15 +1564,18 @@ const resources = {
         creditNotes: "Кредит-ноты",
       },
       landing: {
-        heroSubtitle: "Счета, сметы, клиенты, платежи. Создано для Франции — с прицелом на мир.",
+        heroTitle: "Французская фактурация — ясно, аккуратно и эффективно.",
+        heroSubtitle: "Создавайте счета и сметы, ведите клиентов и отслеживайте оплаты в одном пространстве, созданном для фрилансеров и небольших компаний во Франции.",
       },
       auth: {
         signIn: "Войти", signUp: "Создать аккаунт", email: "Эл. почта", password: "Пароль",
         fullName: "Полное имя", noAccount: "Нет аккаунта?", haveAccount: "Уже есть аккаунт?",
         createAccount: "Создать аккаунт", welcome: "С возвращением",
         startTitle: "Создайте рабочее пространство",
-        sideQuote: "«Строгий французский биллинг — для спокойных предпринимателей.»",
-        sideTags: "Мульти-тенант · Соответствие · Mobile-first",
+        signInSubtitle: "Вернитесь в своё пространство для выставления счетов и продолжайте с того места, где остановились.",
+        signUpSubtitle: "Создайте своё пространство и начните выставлять счета без лишней сложности.",
+        sideQuote: "Спокойствие от понятного инструмента для ваших смет и счетов.",
+        sideTags: "Просто · Надёжно · Профессионально",
         accountCreated: "Аккаунт создан",
       },
       onboarding: {
@@ -1574,7 +1586,9 @@ const resources = {
         companyProfileNote: "Полная форма профиля компании (юр. форма, SIREN/SIRET, режим НДС, юр. упоминания) готова на уровне данных и будет подключена на следующем шаге.",
       },
       dashboard: {
-        welcome: "Добро пожаловать", revenue: "Выручка", unpaid: "Не оплачено", clients: "Клиенты",
+        welcome: "Добро пожаловать",
+        subtitle: "Управляйте сметами, счетами и оплатами в одном месте.",
+        revenue: "Выручка", unpaid: "Не оплачено", clients: "Клиенты",
         recentActivity: "Последняя активность", recentInvoices: "Последние счета", viewAll: "Все",
         empty: "Нет недавней активности.",
         quickActions: "Быстрые действия", newInvoice: "Новый счёт", newDevis: "Новое коммерческое предложение", newClient: "Новый клиент",
