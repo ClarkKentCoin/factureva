@@ -32,7 +32,7 @@ export default function SignIn() {
   return (
     <AuthLayout
       title={t("auth.welcome")}
-      subtitle={t("app.tagline")}
+      subtitle={t("auth.signInSubtitle")}
       footer={<>{t("auth.noAccount")} <Link to="/auth/sign-up" className="text-accent underline-offset-2 hover:underline">{t("auth.signUp")}</Link></>}
     >
       <form onSubmit={onSubmit} className="space-y-4">

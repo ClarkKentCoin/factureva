@@ -44,7 +44,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="px-5 py-5 border-b border-border">
         <Link to="/app" className="block" aria-label="Factureva">
           <img src={brandLogo} alt="Factureva" className="h-7 w-auto" />
-          <div className="text-xs text-muted-foreground mt-2">{t("app.tagline")}</div>
         </Link>
       </div>
 
