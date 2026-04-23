@@ -6,13 +6,16 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Globe } from "lucide-react";
+import brandLogo from "@/assets/factureva-logo.png";
 
 export default function Landing() {
   const { t, i18n } = useTranslation();
   return (
     <div className="min-h-screen bg-background">
       <header className="px-4 sm:px-8 h-16 flex items-center justify-between border-b border-border">
-        <Link to="/" className="font-serif text-2xl">Facturly</Link>
+        <Link to="/" className="flex items-center" aria-label="Factureva">
+          <img src={brandLogo} alt="Factureva" className="h-8 w-auto" />
+        </Link>
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -6,7 +6,7 @@ import { initReactI18next } from "react-i18next";
 const resources = {
   fr: {
     translation: {
-      app: { name: "Facturly", tagline: "Facturation française, simple et structurée." },
+      app: { name: "Factureva", tagline: "Facturation française, simple et structurée." },
       nav: {
         dashboard: "Tableau de bord",
         invoices: "Factures",
@@ -829,7 +829,7 @@ const resources = {
   },
   en: {
     translation: {
-      app: { name: "Facturly", tagline: "French invoicing, simple and structured." },
+      app: { name: "Factureva", tagline: "French invoicing, simple and structured." },
       nav: {
         dashboard: "Dashboard", invoices: "Invoices", devis: "Quotes", clients: "Clients",
         company: "Company", items: "Catalog", activities: "Activities",
@@ -1547,7 +1547,7 @@ const resources = {
   },
   ru: {
     translation: {
-      app: { name: "Facturly", tagline: "Французский биллинг — просто и структурно." },
+      app: { name: "Factureva", tagline: "Французский биллинг — просто и структурно." },
       nav: {
         dashboard: "Дашборд", invoices: "Счета", devis: "Сметы", clients: "Клиенты",
         company: "Компания", items: "Каталог", activities: "Виды деятельности",

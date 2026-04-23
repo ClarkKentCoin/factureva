@@ -12,6 +12,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import brandLogo from "@/assets/factureva-logo.png";
+import brandIcon from "@/assets/factureva-icon.png";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
@@ -40,9 +42,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const Sidebar = (
     <aside className="flex h-full w-64 flex-col border-r border-border bg-[hsl(var(--surface))]">
       <div className="px-5 py-5 border-b border-border">
-        <Link to="/app" className="block">
-          <div className="font-serif text-2xl leading-none">Facturly</div>
-          <div className="text-xs text-muted-foreground mt-1">{t("app.tagline")}</div>
+        <Link to="/app" className="block" aria-label="Factureva">
+          <img src={brandLogo} alt="Factureva" className="h-7 w-auto" />
+          <div className="text-xs text-muted-foreground mt-2">{t("app.tagline")}</div>
         </Link>
       </div>
 
@@ -173,7 +175,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="font-serif text-xl">Facturly</div>
+          <img src={brandIcon} alt="Factureva" className="h-7 w-7" />
           <div className="w-9" />
         </header>
 
