@@ -109,7 +109,7 @@ export default function Dashboard() {
     <PageBody>
       <PageHeader
         title={`${t("dashboard.welcome")}${current ? ` — ${current.tenant.name}` : ""}`}
-        description={t("app.tagline")}
+        description={t("dashboard.subtitle")}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">

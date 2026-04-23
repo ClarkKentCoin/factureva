@@ -39,6 +39,7 @@ export default function SignUp() {
   return (
     <AuthLayout
       title={t("auth.startTitle")}
+      subtitle={t("auth.signUpSubtitle")}
       footer={<>{t("auth.haveAccount")} <Link to="/auth/sign-in" className="text-accent underline-offset-2 hover:underline">{t("auth.signIn")}</Link></>}
     >
       <form onSubmit={onSubmit} className="space-y-4">

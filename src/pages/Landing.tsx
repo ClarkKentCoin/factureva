@@ -36,7 +36,7 @@ export default function Landing() {
       </header>
       <section className="px-4 sm:px-8 py-16 sm:py-24 max-w-5xl mx-auto">
         <h1 className="font-serif text-4xl sm:text-6xl leading-tight">
-          {t("app.tagline")}
+          {t("landing.heroTitle")}
         </h1>
         <p className="mt-6 text-muted-foreground max-w-xl text-lg">
           {t("landing.heroSubtitle")}
