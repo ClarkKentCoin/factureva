@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
   if (memErr || !isMember) return json(403, { error: "not_authorized" });
 
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  const FROM_ADDRESS = Deno.env.get("INVOICE_EMAIL_FROM") ?? "Facturly <onboarding@resend.dev>";
+  const FROM_ADDRESS = Deno.env.get("INVOICE_EMAIL_FROM") ?? "Factureva <onboarding@resend.dev>";
 
   // Pre-insert a queued log row.
   const { data: logRow } = await admin
