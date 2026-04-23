@@ -6,6 +6,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Globe } from "lucide-react";
+import brandLogo from "@/assets/factureva-logo.png";
 
 export default function Landing() {
   const { t, i18n } = useTranslation();
